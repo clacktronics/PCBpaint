@@ -3,7 +3,10 @@
    Units: 1 board unit = 0.1 mm
    ============================================================ */
 const PALETTE=['#FF6B4A','#3D7BFD','#A35BFF','#12B5A5','#FFB020','#FF5DA2','#7CC243','#0EA5C6','#E0569B','#8C6D3F','#5B6CFF','#D9480F'];
-/* Pads: [dx, dy, w, h, shape, number]. Through-hole footprints have a drill (units) and their pads exist on both copper layers. */
+/* Pads: [dx, dy, w, h, shape, number, drill?]. Through-hole footprints have a drill (units) and their pads exist on both copper layers;
+   a pad's own drill overrides the footprint's (0 = surface mount). Shape 'c' with w≠h is an oval.
+   Imported footprints live in the board's own library (S.lib) and may also have
+   holes [[dx, dy, d]] (unplated) and silk [{pts, width}] in place of the body outline. */
 const FP={
   soic8:{label:'NE555',pkg:'SOIC-8',prefix:'U',body:[56,80],pads:[[-42,-30,22,10,'r',1],[-42,-10,22,10,'r',2],[-42,10,22,10,'r',3],[-42,30,22,10,'r',4],[42,30,22,10,'r',5],[42,10,22,10,'r',6],[42,-10,22,10,'r',7],[42,-30,22,10,'r',8]]},
   r0805:{label:'Resistor',pkg:'0805',prefix:'R',body:[16,22],pads:[[0,-20,14,12,'r',1],[0,20,14,12,'r',2]]},
@@ -47,7 +50,7 @@ function seed(){
       {id:'t5',net:'n3',width:5,layer:'top',pts:[[342,190],[410,190]]},
       {id:'t6',net:'n3',width:5,layer:'top',pts:[[410,150],[410,190]]}
     ],
-    vias:[],pours:[],silk:[]
+    vias:[],pours:[],silk:[],lib:{}
   };
 }
 /* Bring any saved board up to the current shape. */
@@ -57,16 +60,23 @@ function migrate(d){
   d.vias=d.vias||[];d.pours=d.pours||[];d.silk=d.silk||[];
   d.rules=Object.assign({gap:2.5,preset:'jlcpcb'},d.rules||{});
   d.board=d.board||{x:60,y:70,w:460,h:270,r:26};
+  d.lib=d.lib||{};
   return d;
 }
 
 /* ---------------- parts and pads ---------------- */
 function rotP(dx,dy,rot){switch(((rot%360)+360)%360){case 90:return[-dy,dx];case 180:return[-dx,-dy];case 270:return[dy,-dx];default:return[dx,dy]}}
-function padsOf(part){const f=FP[part.fp];const sw=part.rot%180!==0;return f.pads.map(([dx,dy,w,h,s,n])=>{const[rx,ry]=rotP(dx,dy,part.rot);const W=sw?h:w,H=sw?w:h,x=part.x+rx,y=part.y+ry;return{key:part.id+':'+n,part,n,x,y,w:W,h:H,s,tht:!!f.drill,drill:f.drill||0,x0:x-W/2,y0:y-H/2,x1:x+W/2,y1:y+H/2}})}
+const fpOf=k=>(S.lib&&S.lib[k])||FP[k];
+function padsOf(part){const f=fpOf(part.fp);const sw=part.rot%180!==0;return f.pads.map(([dx,dy,w,h,s,n,pdr])=>{const[rx,ry]=rotP(dx,dy,part.rot);const W=sw?h:w,H=sw?w:h,x=part.x+rx,y=part.y+ry,drill=pdr??f.drill??0;return{key:part.id+':'+n,part,n,x,y,w:W,h:H,s,tht:drill>0,drill,x0:x-W/2,y0:y-H/2,x1:x+W/2,y1:y+H/2}})}
+/* Unplated holes, as {x, y, d}. */
+function holesOf(part){return(fpOf(part.fp).holes||[]).map(([dx,dy,d])=>{const[rx,ry]=rotP(dx,dy,part.rot);return{x:part.x+rx,y:part.y+ry,d}})}
+function allHoles(){return S.parts.flatMap(holesOf)}
 function allPads(){return S.parts.flatMap(padsOf)}
 const padOn=(pd,layer)=>pd.tht||layer==='top';
-function bodyOf(part){const f=FP[part.fp];const sw=part.rot%180!==0;const w=sw?f.body[1]:f.body[0],h=sw?f.body[0]:f.body[1];return{x0:part.x-w/2,y0:part.y-h/2,x1:part.x+w/2,y1:part.y+h/2,round:f.round,w,h}}
+function bodyOf(part){const f=fpOf(part.fp);const sw=part.rot%180!==0;const w=sw?f.body[1]:f.body[0],h=sw?f.body[0]:f.body[1];return{x0:part.x-w/2,y0:part.y-h/2,x1:part.x+w/2,y1:part.y+h/2,round:f.round,w,h}}
 function partBox(part){const b=bodyOf(part);let r={x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1};for(const p of padsOf(part)){r.x0=Math.min(r.x0,p.x0);r.y0=Math.min(r.y0,p.y0);r.x1=Math.max(r.x1,p.x1);r.y1=Math.max(r.y1,p.y1)}return r}
+/* One pad as an SVG shape; ovals are rounded rects. */
+function padShape(x,y,w,h,s,attrs,rx=0){if(s==='c'&&Math.abs(w-h)<0.01)return`<circle cx="${x}" cy="${y}" r="${w/2}" ${attrs}/>`;if(s==='c')rx=Math.min(w,h)/2;return`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}"${rx?` rx="${rx}"`:''} ${attrs}/>`}
 const viaRect=v=>({x0:v.x-v.d/2,y0:v.y-v.d/2,x1:v.x+v.d/2,y1:v.y+v.d/2});
 const netById=id=>S.nets.find(n=>n.id===id);
 const netName=id=>(netById(id)||{name:'?'}).name;
@@ -78,7 +88,9 @@ function setBoardFromPoly(P){const b=bboxOf(P);S.board={x:b.x0,y:b.y0,w:b.x1-b.x
 /* Silkscreen: footprint outlines, reference designators and free silk, as stroked polylines. */
 function silkStrokes(){
   const out=[];
-  for(const p of S.parts){const b=bodyOf(p);const P=b.round?circlePoly(p.x,p.y,b.w/2):[[b.x0,b.y0],[b.x1,b.y0],[b.x1,b.y1],[b.x0,b.y1]];out.push({pts:P.concat([P[0]]),width:1.5});
+  for(const p of S.parts){const f=fpOf(p.fp);
+    if(f.silk)for(const s of f.silk)out.push({pts:s.pts.map(([dx,dy])=>{const[rx,ry]=rotP(dx,dy,p.rot);return[p.x+rx,p.y+ry]}),width:Math.max(1.2,s.width)});
+    else{const b=bodyOf(p);const P=b.round?circlePoly(p.x,p.y,b.w/2):[[b.x0,b.y0],[b.x1,b.y0],[b.x1,b.y1],[b.x0,b.y1]];out.push({pts:P.concat([P[0]]),width:1.5})}
     const bx=partBox(p);for(const pl of textStrokes(p.ref,p.x,bx.y0-3,REF_SIZE,'middle'))out.push({pts:pl,width:textStrokeWidth(REF_SIZE)})}
   for(const s of S.silk){if(s.kind==='line')out.push({pts:s.pts,width:s.width});else for(const pl of textStrokes(s.text,s.x,s.y,s.size))out.push({pts:pl,width:textStrokeWidth(s.size),item:s})}
   return out;
@@ -103,7 +115,7 @@ let pourCache={key:null,fills:[]},boardCache={key:null};
 function pourFills(){
   if(!S.pours.length)return[];
   if(typeof UI!=='undefined'&&UI.drag&&pourCache.key)return pourCache.fills;
-  const key=JSON.stringify([S.board,S.parts,S.traces,S.vias,S.pours,S.rules.gap]);
+  const key=JSON.stringify([S.board,S.parts,S.traces,S.vias,S.pours,S.rules.gap,S.lib]);
   if(key!==pourCache.key)pourCache={key,fills:computePours()};
   return pourCache.fills;
 }
@@ -134,6 +146,7 @@ function fillPour(po,map,earlier){
   for(const t of S.traces){if(t.layer!==layer||t.net===net)continue;const r=t.width/2+g;if(t.pts.length===1)stamp(bm,blk,t.pts[0],t.pts[0],r,1);for(let i=0;i<t.pts.length-1;i++)stamp(bm,blk,t.pts[i],t.pts[i+1],r,1)}
   for(const pd of pads)if(map[pd.key]!==net)stampRect(bm,blk,pd,g,1);
   for(const v of S.vias)if(v.net!==net)stamp(bm,blk,[v.x,v.y],[v.x,v.y],v.d/2+g,1);
+  for(const hl of allHoles())stamp(bm,blk,[hl.x,hl.y],[hl.x,hl.y],hl.d/2+g,1);
   for(const f of earlier){if(f.layer!==layer||f.net===net)continue;for(let k=0;k<W*H;k++)if(f.grid[k])blk[k]=1;for(const L of f.loops)for(let i=0;i<L.length;i++)stamp(bm,blk,L[i],L[(i+1)%L.length],g,1)}
   const empty={id:po.id,net,layer,ox,oy,W,H,grid:new Uint8Array(W*H),loops:[],island:false,empty:true,area:0};
   const si=Math.floor(po.seed[0]-ox),sj=Math.floor(po.seed[1]-oy);

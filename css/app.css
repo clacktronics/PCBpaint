@@ -88,7 +88,9 @@ aside h2{margin:0;font-size:16px;font-weight:800}
 .parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .parts button{border:1px solid #DDE2E8;background:var(--soft);border-radius:12px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
 .parts button[aria-pressed=true]{border-color:var(--ink);background:#FFF6E5;box-shadow:0 0 0 1px var(--ink)}
-.parts b{font-size:12px}.parts small{font-size:11px;color:var(--ink3)}
+.parts button{position:relative;min-width:0}
+.parts b{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.fpdel{position:absolute;top:2px;right:6px;font-size:14px;line-height:1;color:var(--ink3);cursor:pointer}.fpdel:hover{color:#D9480F}.parts small{font-size:11px;color:var(--ink3)}
 footer{display:flex;flex-wrap:wrap;gap:8px 22px;padding:8px 18px;background:var(--panel);border-top:1px solid var(--line);font-size:12px;color:#4A525C;font-family:'DM Mono',monospace}
 footer .push{margin-left:auto}
 .warn{color:#B4231A}

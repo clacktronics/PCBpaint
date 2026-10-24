@@ -106,6 +106,8 @@
         <div class="shead"><h2>Parts drawer</h2><span>click, then click the board</span></div>
         <input class="search" id="partSearch" type="search" placeholder="Search parts" aria-label="Search parts">
         <div class="parts" id="parts"></div>
+        <button class="newnet" id="bImportFp" title="Or drop .kicad_mod files on the board">Import KiCad footprint…</button>
+        <input type="file" id="fpIn" accept=".kicad_mod" multiple hidden>
       </section>
     </aside>
   </div>
@@ -138,6 +140,7 @@
 <script src="js/geom.js"></script>
 <script src="js/font.js"></script>
 <script src="js/model.js"></script>
+<script src="js/kicad.js"></script>
 <script src="js/export.js"></script>
 <script src="js/app.js"></script>
 </body>

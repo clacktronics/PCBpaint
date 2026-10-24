@@ -47,12 +47,13 @@ function pasteGerber(){return gerber('Paste,Top','Positive',G=>{for(const pd of 
 /* Silk is trimmed off pads by clearing each pad (plus a little) after drawing. */
 function silkGerber(){return gerber('Legend,Top','Positive',G=>{for(const s of silkStrokes())G.line(s.pts,Math.max(1.5,s.width));G.dark(false);for(const pd of allPads())G.pad(pd,1);G.dark(true)})}
 function outlineGerber(){return gerber('Profile,NP','Positive',G=>{const P=boardOutline();G.line(P.concat([P[0]]),1)})}
-function drillFile(){
+function drillFile(plated=true){
   const o=fabOrigin(),holes=[];
-  for(const pd of allPads())if(pd.tht)holes.push({d:pd.drill,p:[pd.x,pd.y]});
-  for(const v of S.vias)holes.push({d:v.drill,p:[v.x,v.y]});
+  if(plated){for(const pd of allPads())if(pd.tht)holes.push({d:pd.drill,p:[pd.x,pd.y]});
+    for(const v of S.vias)holes.push({d:v.drill,p:[v.x,v.y]})}
+  else for(const hl of allHoles())holes.push({d:hl.d,p:[hl.x,hl.y]});
   const sizes=[...new Set(holes.map(h=>h.d))].sort((a,b)=>a-b);
-  const out=['M48','; DRILL file {PCB Paint '+APP_VERSION+'}','; FORMAT={-:-/ absolute / metric / decimal}','; #@! TF.FileFunction,Plated,1,2,PTH','FMAT,2','METRIC'];
+  const out=['M48','; DRILL file {PCB Paint '+APP_VERSION+'}','; FORMAT={-:-/ absolute / metric / decimal}','; #@! TF.FileFunction,'+(plated?'Plated,1,2,PTH':'NonPlated,1,2,NPTH'),'FMAT,2','METRIC'];
   sizes.forEach((d,i)=>out.push(`T${i+1}C${(d/10).toFixed(3)}`));
   out.push('%');
   sizes.forEach((d,i)=>{out.push(`T${i+1}`);for(const h of holes)if(h.d===d){const[x,y]=toMM(h.p,o);out.push(`X${x.toFixed(3)}Y${y.toFixed(3)}`)}});
@@ -63,7 +64,7 @@ function fabFiles(){
   return[{name:n+'-F_Cu.gtl',data:copperGerber('top')},{name:n+'-B_Cu.gbl',data:copperGerber('bottom')},
     {name:n+'-F_Mask.gts',data:maskGerber('top')},{name:n+'-B_Mask.gbs',data:maskGerber('bottom')},
     {name:n+'-F_Paste.gtp',data:pasteGerber()},{name:n+'-F_Silkscreen.gto',data:silkGerber()},
-    {name:n+'-Edge_Cuts.gm1',data:outlineGerber()},{name:n+'-PTH.drl',data:drillFile()}];
+    {name:n+'-Edge_Cuts.gm1',data:outlineGerber()},{name:n+'-PTH.drl',data:drillFile()}].concat(allHoles().length?[{name:n+'-NPTH.drl',data:drillFile(false)}]:[]);
 }
 
 /* ---------------- SVG (1:1 in mm) ---------------- */
@@ -74,8 +75,8 @@ function copperSVG(layer,mirror){
   for(const f of pourFills())if(f.layer===layer&&!f.empty)s+=`<path d="${f.loops.map(L=>d(L)+'Z').join('')}" fill="#000" fill-rule="evenodd"/>`;
   s+='<g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">'+S.traces.filter(t=>t.layer===layer).map(t=>`<path d="${d(t.pts)}" stroke-width="${t.width}"/>`).join('')+'</g>';
   const pads=allPads().filter(pd=>padOn(pd,layer));
-  s+='<g fill="#000">'+pads.map(pd=>pd.s==='c'?`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.w/2}"/>`:`<rect x="${pd.x0}" y="${pd.y0}" width="${pd.w}" height="${pd.h}"/>`).join('')+S.vias.map(v=>`<circle cx="${v.x}" cy="${v.y}" r="${v.d/2}"/>`).join('')+'</g>';
-  s+='<g fill="#fff">'+pads.filter(pd=>pd.tht).map(pd=>`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.drill/2}"/>`).join('')+S.vias.map(v=>`<circle cx="${v.x}" cy="${v.y}" r="${v.drill/2}"/>`).join('')+'</g></g></svg>';
+  s+='<g fill="#000">'+pads.map(pd=>padShape(pd.x,pd.y,pd.w,pd.h,pd.s,'')).join('')+S.vias.map(v=>`<circle cx="${v.x}" cy="${v.y}" r="${v.d/2}"/>`).join('')+'</g>';
+  s+='<g fill="#fff">'+pads.filter(pd=>pd.tht).map(pd=>`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.drill/2}"/>`).join('')+S.vias.map(v=>`<circle cx="${v.x}" cy="${v.y}" r="${v.drill/2}"/>`).join('')+allHoles().map(hl=>`<circle cx="${hl.x}" cy="${hl.y}" r="${hl.d/2}"/>`).join('')+'</g></g></svg>';
   return s;
 }
 

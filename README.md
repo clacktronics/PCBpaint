@@ -22,11 +22,12 @@ Boards autosave to your browser's `localStorage`. Use **Save .json** / **Open…
 - **Vias**: stamp them with the Via tool, or drop them mid-stroke.
 - **Pour**: bucket-fill copper for a net. It keeps the gap from other copper, adds thermal spokes on its own pads and refills as you edit.
 - **Silkscreen**: freehand lines and text, plus part outlines and references. Text uses a built-in single-stroke font, so what you see is what gets made.
+- **KiCad footprints**: click **Import KiCad footprint…** under the parts drawer (or drop `.kicad_mod` files on the board). Pads, drills, unplated holes and front silkscreen come across; the footprints are saved inside the board file.
 - **Board shape**: resize the rectangle and round its corners, or draw any outline.
 - **Check board**: flags things that are too close, nets in pieces, copper near the edge, and widths, drills or gaps below the chosen fab's limits.
 - **Make it →**: pick a fab preset (JLCPCB, PCBWay, home milling, laser ablation) and download a zip of Gerber RS-274X files (with X2 attributes) plus an Excellon drill file. You can also get 1:1 copper SVGs.
 
-The zip contains `F_Cu`, `B_Cu`, `F_Mask`, `B_Mask`, `F_Paste`, `F_Silkscreen`, `Edge_Cuts` and `PTH.drl`. They use KiCad-style names, so fab uploaders recognise the layers. All coordinates are in mm, with the origin at the board's bottom-left corner.
+The zip contains `F_Cu`, `B_Cu`, `F_Mask`, `B_Mask`, `F_Paste`, `F_Silkscreen`, `Edge_Cuts` and `PTH.drl`, plus `NPTH.drl` when a footprint has unplated holes. They use KiCad-style names, so fab uploaders recognise the layers. All coordinates are in mm, with the origin at the board's bottom-left corner.
 
 ## Keys
 
@@ -51,6 +52,7 @@ The zip contains `F_Cu`, `B_Cu`, `F_Mask`, `B_Mask`, `F_Paste`, `F_Silkscreen`, 
 | `js/geom.js` | Geometry helpers |
 | `js/font.js` | Single-stroke silkscreen font |
 | `js/model.js` | Footprints, board data, net derivation, pour fill, connectivity |
+| `js/kicad.js` | KiCad `.kicad_mod` footprint import |
 | `js/export.js` | Gerber, Excellon, SVG and zip writers |
 | `js/app.js` | Rendering, tools and UI |
 

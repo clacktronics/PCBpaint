@@ -206,7 +206,7 @@ When a stroke comes within the gap of another net's trace (but doesn't cross it)
 | Shape | `O` | Board outline: drag handles to resize the rectangle, or draw any polygon and drag, add or Alt-click-remove its corners. |
 | Pan / zoom | Space-drag, middle-drag, wheel | Zoom about the cursor; **Fit board** resets the view. |
 
-**Parts drawer**: click a part to pick it up, click the board to place it, `R` to rotate, shift-click to place several, `Esc` to cancel. Reference designators number automatically (`R1`, `R2`…). Starter library: SOIC-8, 0805 resistor and capacitor, 1206, 5 mm LED, 2-pin header, 9 mm pot, 3.5 mm jack, 6 mm button. Later: KiCad `.kicad_mod` import and a search box.
+**Parts drawer**: click a part to pick it up, click the board to place it, `R` to rotate, shift-click to place several, `Esc` to cancel. Reference designators number automatically (`R1`, `R2`…). Starter library: SOIC-8, 0805 resistor and capacitor, 1206, 5 mm LED, 2-pin header, 9 mm pot, 3.5 mm jack, 6 mm button. **Import KiCad footprint…** (or dropping `.kicad_mod` files on the board) adds footprints to the drawer; see *KiCad footprint import* below.
 
 ---
 
@@ -249,7 +249,11 @@ When a stroke comes within the gap of another net's trace (but doesn't cross it)
 }
 ```
 
-- **Footprints** are a library keyed by `fp`. Each footprint has pads `[dx, dy, w, h, shape, number]` and a body outline.
+- **Footprints** are a library keyed by `fp`. Each footprint has pads `[dx, dy, w, h, shape, number, drill?]` and a body outline. Built-in footprints live in the app; imported ones live in the board's own `lib` so the file stays self-contained. Imported footprints may also carry `holes` (unplated, `[dx, dy, d]`) and `silk` polylines that replace the body outline on the silkscreen.
+
+### KiCad footprint import
+
+Reads KiCad 5 (`module`) and 6+ (`footprint`) `.kicad_mod` files. Pads on the front copper become SMD pads; `thru_hole` pads keep their own drill; `np_thru_hole` pads become unplated holes (exported as `NPTH.drl`). `circle`/`oval` pads stay round/oval, every other shape becomes its bounding rectangle. Slots become round holes of the slot width; pads at angles other than multiples of 90° become their bounding box; bottom-only SMD pads are skipped. `F.SilkS` lines, rects, circles, arcs and polygons become the part's silkscreen; the body box comes from `F.Fab`, else `F.CrtYd`, else the silk, else the pads. The footprint is re-centred on its middle so it rotates in place. Duplicate pad numbers get suffixes (`5`, `5.2`) so each pad takes its own net. The reference prefix is guessed from the name (`R_…` → R, `PinHeader…` → J, otherwise U). Imported footprints show a × in the drawer while no part uses them.
 - **Pad nets are derived at runtime** (§4.3). They are not stored.
 - **Undo/redo** keeps whole-document snapshots (cheap at this scale), up to 150 steps.
 - **Persistence**: autosave to `localStorage`; Save/Open as `.pcbp.json`.
@@ -293,7 +297,7 @@ When a stroke comes within the gap of another net's trace (but doesn't cross it)
 | **M2 — Real boards** *(done)* | Board outline editing (rectangle → any shape), bucket pour with thermals, Gerber/Excellon export, fab presets, per-net widths, mm grid soft-snap |
 | **M3 — Two layers** *(done)* | Bottom copper, vias (stamp and mid-stroke), layer ghosting, crossings via the back |
 | **M4 — Make it pretty** *(silk done)* | Silkscreen brush and text, mask colour and finish preview, 3D peek |
-| **M5 — Interop** *(pot merge done)* | KiCad footprint import, netlist import (pinned pad nets plus a ratsnest hint), `.kicad_pcb` export, pot merge |
+| **M5 — Interop** *(pot merge and KiCad footprint import done)* | KiCad footprint import, netlist import (pinned pad nets plus a ratsnest hint), `.kicad_pcb` export, pot merge |
 
 ---
 

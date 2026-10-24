@@ -127,15 +127,15 @@ function render(){
   h+=copperSVG_(L,true,nets);
   // pads
   for(const pd of allPads()){const n=nets.map[pd.key];const st=nets.conf.has(pd.key)?'#FF3B30':(n?netColor(n):'#8A9099');const sw=nets.conf.has(pd.key)?3:1.6;const op=padOn(pd,L)?1:0.35;
-    h+=pd.s==='c'?`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.w/2}" fill="#E8C27A" stroke="${st}" stroke-width="${sw}" opacity="${op}"/>`
-      :`<rect x="${pd.x0}" y="${pd.y0}" width="${pd.w}" height="${pd.h}" rx="2" fill="#E8C27A" stroke="${st}" stroke-width="${sw}" opacity="${op}"/>`;
+    h+=padShape(pd.x,pd.y,pd.w,pd.h,pd.s,`fill="#E8C27A" stroke="${st}" stroke-width="${sw}" opacity="${op}"`,Math.min(2,pd.w/2,pd.h/2));
     if(pd.tht)h+=`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.drill/2}" fill="#0E1F18"/>`}
   for(const v of S.vias)h+=`<circle cx="${v.x}" cy="${v.y}" r="${v.d/2}" fill="#E8C27A" stroke="${netColor(v.net)}" stroke-width="1.2"/><circle cx="${v.x}" cy="${v.y}" r="${v.drill/2}" fill="#0E1F18"/>`;
+  for(const hl of allHoles())h+=`<circle cx="${hl.x}" cy="${hl.y}" r="${hl.d/2}" fill="#0E1F18" stroke="#5A626D" stroke-width="0.8"/>`;
   if(silkOnTop)h+=silkSVG_(1);
   // check marks
   if(UI.marks.length&&performance.now()<UI.marksUntil){for(const m of UI.marks)h+=`<circle cx="${m[0]}" cy="${m[1]}" r="9" fill="none" stroke="#FF3B30" stroke-width="2"/><circle cx="${m[0]}" cy="${m[1]}" r="14" fill="none" stroke="#FF3B30" stroke-width="1" opacity=".5"/>`}
   // ghost part
-  if(UI.arming&&UI.cursor){const c=UI.grid?snapGrid(UI.cursor):UI.cursor.map(Math.round);const g={id:'ghost',ref:'',fp:UI.arming,x:c[0],y:c[1],rot:UI.armRot};h+='<g opacity=".6">';const b=bodyOf(g);h+=b.round?`<circle cx="${g.x}" cy="${g.y}" r="${b.w/2}" fill="none" stroke="#fff" stroke-dasharray="3 2"/>`:`<rect x="${b.x0}" y="${b.y0}" width="${b.w}" height="${b.h}" fill="none" stroke="#fff" stroke-dasharray="3 2"/>`;for(const pd of padsOf(g))h+=pd.s==='c'?`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.w/2}" fill="#E8C27A"/>`:`<rect x="${pd.x0}" y="${pd.y0}" width="${pd.w}" height="${pd.h}" fill="#E8C27A"/>`;h+='</g>'}
+  if(UI.arming&&UI.cursor){const c=UI.grid?snapGrid(UI.cursor):UI.cursor.map(Math.round);const g={id:'ghost',ref:'',fp:UI.arming,x:c[0],y:c[1],rot:UI.armRot};h+='<g opacity=".6">';const b=bodyOf(g);h+=b.round?`<circle cx="${g.x}" cy="${g.y}" r="${b.w/2}" fill="none" stroke="#fff" stroke-dasharray="3 2"/>`:`<rect x="${b.x0}" y="${b.y0}" width="${b.w}" height="${b.h}" fill="none" stroke="#fff" stroke-dasharray="3 2"/>`;for(const pd of padsOf(g))h+=padShape(pd.x,pd.y,pd.w,pd.h,pd.s,'fill="#E8C27A"');h+='</g>'}
   // board shape editing
   if(UI.tool==='shape'){const hr=6*upx;
     if(UI.outline){const O=UI.outline,c=UI.cursor?snapGrid(UI.cursor):null;h+=`<path d="${dPath(c?O.concat([c]):O)}" fill="none" stroke="#FF6B4A" stroke-width="${2*upx}" stroke-dasharray="${6*upx} ${4*upx}"/>`;O.forEach((q,i)=>h+=`<circle cx="${q[0]}" cy="${q[1]}" r="${(i?4:7)*upx}" fill="${i?'#fff':'#FF6B4A'}" stroke="#16191D" stroke-width="${1.5*upx}"/>`)}
@@ -186,13 +186,16 @@ function renderPots(){
 }
 function renderParts(){
   const q=UI.partQuery.trim().toLowerCase();
-  const list=Object.entries(FP).filter(([k,f])=>!q||(f.label+' '+f.pkg+' '+f.prefix+' '+k).toLowerCase().includes(q));
+  const list=Object.entries(FP).concat(Object.entries(S.lib)).filter(([k,f])=>!q||(f.label+' '+f.pkg+' '+f.prefix+' '+k).toLowerCase().includes(q));
+  const inUse=new Set(S.parts.map(p=>p.fp));
   document.getElementById('parts').innerHTML=list.map(([k,f])=>{
     const xs=f.pads.map(p=>[p[0]-p[2]/2,p[0]+p[2]/2]).flat().concat([-f.body[0]/2,f.body[0]/2]),ys=f.pads.map(p=>[p[1]-p[3]/2,p[1]+p[3]/2]).flat().concat([-f.body[1]/2,f.body[1]/2]);
-    const x0=Math.min(...xs)-3,x1=Math.max(...xs)+3,y0=Math.min(...ys)-3,y1=Math.max(...ys)+3;
-    const body=f.round?`<circle cx="0" cy="0" r="${f.body[0]/2}" fill="none" stroke="#5A626D" stroke-width="1.6"/>`:`<rect x="${-f.body[0]/2}" y="${-f.body[1]/2}" width="${f.body[0]}" height="${f.body[1]}" fill="none" stroke="#5A626D" stroke-width="1.6"/>`;
-    const pads=f.pads.map(([x,y,w,hh,s])=>s==='c'?`<circle cx="${x}" cy="${y}" r="${w/2}" fill="#D7A748"/>`:`<rect x="${x-w/2}" y="${y-hh/2}" width="${w}" height="${hh}" fill="#D7A748"/>`).join('');
-    return`<button data-fp="${k}" aria-pressed="${UI.arming===k}"><svg width="48" height="36" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" aria-hidden="true">${body}${pads}</svg><b>${f.label}</b><small>${f.pkg}</small></button>`}).join('')||'<p style="margin:0;font-size:13px;color:#5A626D;grid-column:1/-1">No parts match.</p>';
+    const x0=Math.min(...xs)-3,x1=Math.max(...xs)+3,y0=Math.min(...ys)-3,y1=Math.max(...ys)+3,sw=Math.max(1.6,(x1-x0)/40);
+    const body=f.silk?f.silk.map(l=>`<path d="${dPath(l.pts)}" fill="none" stroke="#5A626D" stroke-width="${sw}"/>`).join('')
+      :f.round?`<circle cx="0" cy="0" r="${f.body[0]/2}" fill="none" stroke="#5A626D" stroke-width="1.6"/>`:`<rect x="${-f.body[0]/2}" y="${-f.body[1]/2}" width="${f.body[0]}" height="${f.body[1]}" fill="none" stroke="#5A626D" stroke-width="1.6"/>`;
+    const pads=f.pads.map(([x,y,w,hh,s])=>padShape(x,y,w,hh,s,'fill="#D7A748"')).join('');
+    const del=S.lib[k]&&!inUse.has(k)?`<span class="fpdel" data-del="${esc(k)}" title="Remove from this board's library" aria-hidden="true">×</span>`:'';
+    return`<button data-fp="${esc(k)}" aria-pressed="${UI.arming===k}" title="${esc(f.label)}"><svg width="48" height="36" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" aria-hidden="true">${body}${pads}</svg><b>${esc(f.label)}</b><small>${esc(f.pkg)}</small>${del}</button>`}).join('')||'<p style="margin:0;font-size:13px;color:#5A626D;grid-column:1/-1">No parts match.</p>';
 }
 function changed(){save();renderPots();renderParts();syncShapeOpts();syncNetW();schedule()}
 
@@ -356,7 +359,7 @@ function startSilkMove(item,p){snapshot();UI.drag={type:'silkmove',item,start:p,
 function silkMoveTo(p){const d=UI.drag,dx=Math.round(p[0]-d.start[0]),dy=Math.round(p[1]-d.start[1]);if(d.item.kind==='text'){d.item.x=d.orig.x+dx;d.item.y=d.orig.y+dy}else d.item.pts=d.orig.pts.map(q=>[q[0]+dx,q[1]+dy]);d.moved=d.moved||dx!==0||dy!==0}
 function startPan(e){UI.drag={type:'pan',cx:e.clientX,cy:e.clientY,vx:UI.vb.x,vy:UI.vb.y}}
 function panTo(e){const d=UI.drag;const s=unitsPerPx();UI.vb.x=d.vx-(e.clientX-d.cx)*s;UI.vb.y=d.vy-(e.clientY-d.cy)*s}
-function placePart(p,keep){const f=FP[UI.arming];snapshot();const used=S.parts.filter(x=>x.ref.startsWith(f.prefix)&&/^\d+$/.test(x.ref.slice(f.prefix.length))).map(x=>parseInt(x.ref.slice(f.prefix.length)));const ref=f.prefix+(Math.max(0,...used)+1);
+function placePart(p,keep){const f=fpOf(UI.arming);if(!f){UI.arming=null;return}snapshot();const used=S.parts.filter(x=>x.ref.startsWith(f.prefix)&&/^\d+$/.test(x.ref.slice(f.prefix.length))).map(x=>parseInt(x.ref.slice(f.prefix.length)));const ref=f.prefix+(Math.max(0,...used)+1);
   const q=UI.grid?snapGrid(p):p.map(Math.round);
   S.parts.push({id:'p'+(S.seq++),ref,fp:UI.arming,x:q[0],y:q[1],rot:UI.armRot});toast(`Placed ${ref}${keep?' — shift-click to keep placing':''}`);if(!keep)UI.arming=null;changed()}
 function zoomAt(f,cx,cy){const vb=UI.vb;const nw=Math.max(60,Math.min(4000,vb.w*f));const k=nw/vb.w;if(cx==null){cx=vb.x+vb.w/2;cy=vb.y+vb.h/2}vb.x=cx-(cx-vb.x)*k;vb.y=cy-(cy-vb.y)*k;vb.w=nw;vb.h=vb.h*k;schedule()}
@@ -453,8 +456,26 @@ function newNetUI(){const n=addNet();requestAnimationFrame(()=>{const inp=docume
 document.getElementById('bNewNet').onclick=newNetUI;
 
 /* parts */
-document.getElementById('parts').addEventListener('click',e=>{const b=e.target.closest('button[data-fp]');if(!b)return;UI.arming=UI.arming===b.dataset.fp?null:b.dataset.fp;UI.armRot=0;renderParts();if(UI.arming)toast('Click the board to place · R rotates · Esc cancels');schedule()});
+document.getElementById('parts').addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d){const k=d.dataset.del;if(S.lib[k]&&!S.parts.some(p=>p.fp===k)){snapshot();const name=S.lib[k].label;delete S.lib[k];if(UI.arming===k)UI.arming=null;changed();toast(`Removed ${name} from the drawer`)}return}
+  const b=e.target.closest('button[data-fp]');if(!b)return;UI.arming=UI.arming===b.dataset.fp?null:b.dataset.fp;UI.armRot=0;renderParts();if(UI.arming)toast('Click the board to place · R rotates · Esc cancels');schedule()});
 document.getElementById('partSearch').addEventListener('input',e=>{UI.partQuery=e.target.value;renderParts()});
+/* KiCad footprints go into this board's own library, so they travel with the saved file. */
+function importFootprints(files){
+  files=[...files].filter(f=>/\.kicad_mod$/i.test(f.name));if(!files.length)return toast('Pick .kicad_mod files (from a KiCad .pretty folder)');
+  Promise.all(files.map(f=>f.text().then(t=>{try{return kicadFootprint(t)}catch(err){return{error:f.name+': '+err.message}}}))).then(res=>{
+    const ok=res.filter(r=>!r.error),bad=res.filter(r=>r.error);
+    if(ok.length){snapshot();for(const r of ok)S.lib['kicad:'+r.name]=r.fp;
+      if(ok.length===1){UI.arming='kicad:'+ok[0].name;UI.armRot=0}
+      changed()}
+    const notes=[...new Set(ok.flatMap(r=>r.notes))];
+    toast(ok.length?(ok.length===1?`Added ${ok[0].name} — click the board to place it`:`Added ${ok.length} footprints to the drawer`)+(notes.length?' · '+notes.join(', '):'')+(bad.length?` · ${bad.length} couldn't be read`:'')
+      :`Couldn't read that: ${bad[0].error}`);
+    if(bad.length)console.warn('Footprint import',bad.map(b=>b.error))});
+}
+document.getElementById('bImportFp').onclick=()=>document.getElementById('fpIn').click();
+document.getElementById('fpIn').onchange=e=>{importFootprints(e.target.files);e.target.value=''};
+document.querySelector('main').addEventListener('dragover',e=>{if(e.dataTransfer.types.includes('Files'))e.preventDefault()});
+document.querySelector('main').addEventListener('drop',e=>{if(!e.dataTransfer.files.length)return;e.preventDefault();importFootprints(e.dataTransfer.files)});
 
 /* options */
 /* Sliders that change the document take one undo snapshot per drag. */
