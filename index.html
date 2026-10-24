@@ -6,86 +6,7 @@
 <title>PCB Paint</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#E7EAEE; --panel:#FFFFFF; --soft:#F7F8FA; --line:#D5DAE0; --ink:#16191D; --ink2:#3A414A; --ink3:#5A626D;
-  --accent:#FF6B4A; --chip:#EEF1F4;
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font-family:'Bricolage Grotesque',system-ui,sans-serif}
-button,input{font-family:inherit;color:inherit}
-.mono{font-family:'DM Mono',ui-monospace,monospace}
-.app{min-height:100vh;display:flex;flex-direction:column}
-header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em}
-.menu{display:flex;gap:2px;flex-wrap:wrap}
-.menu button{border:0;background:none;padding:8px 10px;border-radius:8px;font-size:14px;color:var(--ink2);cursor:pointer}
-.menu button:hover{background:var(--chip)}
-.layers{display:flex;flex-wrap:wrap;gap:6px;padding:4px;background:var(--chip);border-radius:12px;margin:0 auto}
-.layers button{border:0;padding:8px 14px;border-radius:9px;background:transparent;color:var(--ink2);font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer}
-.layers button[aria-pressed=true]{background:var(--ink);color:#fff}
-.layers button:disabled{opacity:.55;cursor:not-allowed}
-.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
-.hbtn{border:1px solid #C9D0D8;background:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer}
-.hbtn.primary{border:0;background:var(--accent);color:#1A0E0A;font-weight:700}
-.opts{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:8px 18px;background:var(--soft);border-bottom:1px solid var(--line);font-size:13px;color:var(--ink2)}
-.opts label{display:flex;align-items:center;gap:8px}
-.opts input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
-.opts input[type=range]{accent-color:var(--accent);width:120px}
-.seg{display:flex;background:#E3E7EC;border-radius:9px;padding:3px}
-.seg button{border:0;background:none;padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;color:var(--ink2)}
-.seg button[aria-pressed=true]{background:#fff;font-weight:700;color:var(--ink)}
-.curnet{font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
-.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-.body{flex:1;display:flex;flex-wrap:wrap;min-height:0}
-nav.tools{flex:0 0 84px;background:var(--panel);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:6px}
-nav.tools button{border:0;border-radius:14px;padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:4px;background:transparent;color:var(--ink2);font-size:11px;font-weight:600;min-height:56px;cursor:pointer}
-nav.tools button:hover{background:var(--chip)}
-nav.tools button[aria-pressed=true]{background:var(--accent);color:var(--ink)}
-nav.tools kbd{font-family:'DM Mono',monospace;font-size:10px;opacity:.65}
-main{flex:999 1 560px;min-width:0;position:relative;min-height:620px;background-color:#DDE1E6;background-image:radial-gradient(#B4BCC6 1.2px,transparent 1.3px);background-size:18px 18px;overflow:hidden}
-#svg{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
-#svg.brush{cursor:none}
-#svg.erase{cursor:crosshair}
-#svg.move{cursor:grab}
-.float{position:absolute;background:#fff;border:1px solid var(--line);border-radius:14px}
-.tip{right:16px;top:14px;max-width:270px;padding:12px 14px;font-size:13px;line-height:1.45;color:var(--ink2)}
-.tip strong{color:var(--ink)}
-.kbd{font-family:'DM Mono',monospace;background:var(--chip);padding:1px 5px;border-radius:5px;font-size:12px}
-.zoom{left:16px;bottom:14px;display:flex;align-items:center;gap:4px;padding:4px;border-radius:12px}
-.zoom button{width:44px;height:40px;border:0;background:none;border-radius:9px;font-size:18px;cursor:pointer}
-.zoom button.fit{width:auto;padding:0 12px;font-size:13px;font-weight:600;background:var(--chip)}
-.status{position:absolute;right:16px;bottom:14px;display:flex;gap:8px;align-items:center;background:var(--ink);color:#fff;border-radius:12px;padding:8px 12px;font-size:13px}
-#toast{position:absolute;left:50%;top:16px;transform:translate(-50%,-8px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:80%;text-align:center}
-#toast.show{opacity:1;transform:translate(-50%,0)}
-aside{flex:1 1 290px;background:var(--panel);border-left:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:22px;overflow:auto}
-aside h2{margin:0;font-size:16px;font-weight:800}
-.shead{display:flex;justify-content:space-between;align-items:baseline}
-.shead span{font-size:12px;color:var(--ink3)}
-#pots{display:flex;flex-direction:column;gap:8px}
-.pot{display:flex;align-items:center;gap:10px;border:1px solid #E3E7EC;background:#fff;border-radius:12px;padding:7px 8px 7px 10px;cursor:pointer;min-height:48px}
-.pot.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
-.pot .swatch{flex:0 0 28px;height:28px;border-radius:50%;position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18);cursor:pointer;overflow:hidden}
-.pot .swatch input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border:0;padding:0}
-.pot .pinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.pot .pname{border:0;background:transparent;font-size:14px;font-weight:700;padding:2px 4px;margin-left:-4px;border-radius:6px;width:100%}
-.pot .pname:focus{outline:2px solid var(--accent);background:#FFF6F2}
-.pot .pstat{font-size:12px;color:var(--ink3);font-family:'DM Mono',monospace}
-.pot .pkey{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);width:14px;text-align:center}
-.pot .pdel{border:0;background:none;width:32px;height:32px;border-radius:8px;font-size:18px;color:var(--ink3);cursor:pointer;opacity:0}
-.pot:hover .pdel,.pot:focus-within .pdel{opacity:1}
-.pot .pdel:hover{background:var(--chip);color:var(--ink)}
-.newnet{border:1.5px dashed #B9C1CB;background:var(--soft);border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px}
-.newnet:hover{border-color:var(--ink);color:var(--ink)}
-.parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.parts button{border:1px solid #DDE2E8;background:var(--soft);border-radius:12px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
-.parts button[aria-pressed=true]{border-color:var(--ink);background:#FFF6E5;box-shadow:0 0 0 1px var(--ink)}
-.parts b{font-size:12px}.parts small{font-size:11px;color:var(--ink3)}
-footer{display:flex;flex-wrap:wrap;gap:8px 22px;padding:8px 18px;background:var(--panel);border-top:1px solid var(--line);font-size:12px;color:#4A525C;font-family:'DM Mono',monospace}
-footer .push{margin-left:auto}
-.warn{color:#B4231A}
-</style>
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 <div class="app">
@@ -97,69 +18,100 @@ footer .push{margin-left:auto}
     <div class="menu">
       <button id="bUndo" title="Ctrl+Z">Undo</button>
       <button id="bRedo" title="Ctrl+Shift+Z">Redo</button>
+      <button id="bNew">New</button>
       <button id="bSave">Save .json</button>
       <button id="bLoad">Open…</button>
       <button id="bReset">Reset demo</button>
       <input type="file" id="fileIn" accept=".json,application/json" hidden>
     </div>
     <div class="layers" aria-label="Layers">
-      <button aria-pressed="true"><span class="sw" style="background:#E8C27A"></span>Top copper</button>
-      <button disabled title="Coming in a later milestone"><span class="sw" style="background:#8AA4C8"></span>Bottom copper</button>
-      <button disabled title="Coming in a later milestone"><span class="sw" style="background:#fff;border:1px solid #9AA3AE"></span>Silkscreen</button>
-      <button disabled title="Coming in a later milestone"><span class="sw" style="background:#1E3B30"></span>Board shape</button>
+      <button data-view="top" title="Top copper (L swaps copper sides)"><span class="sw" style="background:#E8C27A"></span>Top copper</button>
+      <button data-view="bottom" title="Bottom copper (L swaps copper sides)"><span class="sw" style="background:#8AA4C8"></span>Bottom copper</button>
+      <button data-view="silk" title="Silkscreen (S)"><span class="sw" style="background:#fff;border:1px solid #9AA3AE"></span>Silkscreen</button>
+      <button data-view="shape" title="Board shape (O)"><span class="sw" style="background:#1E3B30"></span>Board shape</button>
     </div>
     <div style="display:flex;gap:8px">
       <button class="hbtn" id="bCheck">Check board</button>
-      <button class="hbtn primary" id="bMake" title="Download the top copper as SVG">Make it →</button>
+      <button class="hbtn primary" id="bMake" title="Gerbers, drill file and SVG">Make it →</button>
     </div>
   </header>
 
-  <div class="opts">
-    <span class="curnet" id="curNet"></span>
-    <label>Size <input type="range" id="rWidth" min="2" max="20" step="1" value="6"> <span class="mono" id="wLbl">0.60 mm</span></label>
-    <div style="display:flex;align-items:center;gap:8px">Corners
+  <div class="opts" id="opts">
+    <span class="curnet grp" data-tools="brush pour via" id="curNet"></span>
+    <label class="grp" data-tools="brush">Size <input type="range" id="rWidth" min="2" max="20" step="1" value="6"> <span class="mono" id="wLbl">0.60 mm</span></label>
+    <label class="grp" data-tools="brush" title="Picking this net again brings back this size"><input type="checkbox" id="cNetW"> Remember size for this net</label>
+    <div class="grp" data-tools="brush">Corners
       <span class="seg" id="segCorners">
         <button data-c="round" aria-pressed="true">Round</button>
         <button data-c="45" aria-pressed="false">45°</button>
         <button data-c="free" aria-pressed="false">Freehand</button>
       </span>
     </div>
-    <label><input type="checkbox" id="cTidy" checked> Tidy stroke on release</label>
-    <label><input type="checkbox" id="cSnap" checked> Snap to pad centres</label>
-    <label><input type="checkbox" id="cShove" checked> Shove other nets</label>
-    <label>Gap <input type="range" id="rClear" min="1" max="8" step="0.5" value="2.5" style="width:90px"> <span class="mono" id="cLbl">0.25 mm</span></label>
+    <label class="grp" data-tools="brush"><input type="checkbox" id="cTidy" checked> Tidy stroke on release</label>
+    <label class="grp" data-tools="brush"><input type="checkbox" id="cSnap" checked> Snap to pad centres</label>
+    <label class="grp" data-tools="brush"><input type="checkbox" id="cShove" checked> Shove other nets</label>
+    <span class="grp hint" data-tools="pour">Click empty board to flood it with this net.</span>
+    <label class="grp" data-tools="pour"><input type="checkbox" id="cThermal" checked> Thermal spokes on pads</label>
+    <label class="grp" data-tools="via">Via <select id="sVia"></select></label>
+    <span class="grp hint" data-tools="via">Click to drop a via. While painting, press <span class="kbd">Alt</span> to hop to the other side.</span>
+    <label class="grp" data-tools="brush pour via">Gap <input type="range" id="rClear" min="1" max="8" step="0.5" value="2.5" style="width:90px"> <span class="mono" id="cLbl">0.25 mm</span></label>
+    <span class="grp hint" data-tools="move">Drag a part · <span class="kbd">R</span> rotates · <span class="kbd">Delete</span> removes · drag empty board to pan.</span>
+    <label class="grp" data-tools="move"><input type="checkbox" id="cGrid" checked> Snap parts to 0.5 mm grid</label>
+    <div class="grp" data-tools="erase">Erase
+      <span class="seg" id="segErase">
+        <button data-e="whole" aria-pressed="true">Whole strokes</button>
+        <button data-e="bit" aria-pressed="false">Just a bit</button>
+      </span>
+    </div>
+    <span class="grp hint" data-tools="erase" id="eraseHint"></span>
+    <label class="grp" data-tools="silk">Line <input type="range" id="rSilkW" min="1.5" max="6" step="0.5" value="2"> <span class="mono" id="swLbl">0.20 mm</span></label>
+    <label class="grp" data-tools="silk">Text <input type="range" id="rSilkT" min="8" max="40" step="1" value="14"> <span class="mono" id="stLbl">1.4 mm</span></label>
+    <span class="grp hint" data-tools="silk">Drag to draw · click to type text.</span>
+    <label class="grp" data-tools="shape">Width <input type="number" id="nBW" min="5" max="500" step="0.5" class="num"> mm</label>
+    <label class="grp" data-tools="shape">Height <input type="number" id="nBH" min="5" max="500" step="0.5" class="num"> mm</label>
+    <label class="grp" data-tools="shape">Corners <input type="range" id="rBR" min="0" max="100" step="1"> <span class="mono" id="brLbl"></span></label>
+    <button class="grp sbtn" data-tools="shape" id="bDrawOutline">Draw any shape</button>
+    <button class="grp sbtn" data-tools="shape" id="bRectOutline">Back to rectangle</button>
+    <span class="grp hint" data-tools="shape" id="shapeHint"></span>
   </div>
 
   <div class="body">
     <nav class="tools" aria-label="Tools">
-      <button data-tool="brush" aria-pressed="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4.5l5 5L11 18l-5-5z M6 13c-2.5.5-3 2.5-3 4.5 0 1-.5 2-1.5 2.5 3 1 7 .5 8.5-2.5"/></svg>Brush<kbd>B</kbd></button>
-      <button data-tool="move" aria-pressed="false"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3l15 7.5-6.5 2-2 6.5z"/></svg>Move<kbd>V</kbd></button>
-      <button data-tool="erase" aria-pressed="false"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 20h12 M4.5 15.5l9-9a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L13 19H8.5z M9 11l5 5"/></svg>Eraser<kbd>E</kbd></button>
+      <button data-tool="brush"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4.5l5 5L11 18l-5-5z M6 13c-2.5.5-3 2.5-3 4.5 0 1-.5 2-1.5 2.5 3 1 7 .5 8.5-2.5"/></svg>Brush<kbd>B</kbd></button>
+      <button data-tool="move"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3l15 7.5-6.5 2-2 6.5z"/></svg>Move<kbd>V</kbd></button>
+      <button data-tool="pour"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11l7-7 7 7-7 7z M19 15c1 1.6 1.5 2.6 1.5 3.3a1.5 1.5 0 0 1-3 0c0-.7.5-1.7 1.5-3.3z M3 21h10"/></svg>Pour<kbd>G</kbd></button>
+      <button data-tool="via"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/></svg>Via<kbd>X</kbd></button>
+      <button data-tool="erase"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 20h12 M4.5 15.5l9-9a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L13 19H8.5z M9 11l5 5"/></svg>Eraser<kbd>E</kbd></button>
+      <button data-tool="silk"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18c3-6 5-10 8-10s2 6 4 6 2-3 4-4 M4 6h7 M7.5 6v6"/></svg>Silk<kbd>S</kbd></button>
+      <button data-tool="shape"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7a2 2 0 0 1 2-2h7l5 5v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><circle cx="14" cy="5" r="1.6" fill="currentColor"/><circle cx="19" cy="10" r="1.6" fill="currentColor"/></svg>Shape<kbd>O</kbd></button>
     </nav>
 
     <main>
       <svg id="svg" class="brush" viewBox="40 50 520 310" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Board canvas"></svg>
-      <div class="float tip"><strong>Start a stroke on a pad or trace</strong> and you paint with its net. Start on empty board and you use the selected pot. Strokes push other nets aside instead of touching them. <span class="kbd">N</span> new net · <span class="kbd">[ ]</span> size · <span class="kbd">R</span> rotate part</div>
+      <div class="float tip" id="tip"><button class="x" id="tipX" aria-label="Hide tip">×</button><strong>Start a stroke on a pad or trace</strong> and you paint with its net. Start on empty board and you use the selected pot. Strokes push other nets aside instead of touching them. <span class="kbd">N</span> new net · <span class="kbd">[ ]</span> size · <span class="kbd">R</span> rotate part · <span class="kbd">Alt</span> while painting drops a via</div>
+      <div class="float checks" id="checks" hidden></div>
       <div class="float zoom"><button id="zOut" aria-label="Zoom out">−</button><span class="mono" id="zLbl" style="font-size:13px;padding:0 6px">100%</span><button id="zIn" aria-label="Zoom in">+</button><button class="fit" id="zFit">Fit board</button></div>
       <div class="status" id="status"></div>
+      <input class="float textin" id="textIn" placeholder="Type, then Enter" hidden>
       <div id="toast" role="status" aria-live="polite"></div>
     </main>
 
     <aside>
       <section style="display:flex;flex-direction:column;gap:10px">
-        <div class="shead"><h2>Paint pots</h2><span>one colour per net</span></div>
+        <div class="shead"><h2>Paint pots</h2><span>drag onto another to merge</span></div>
         <div id="pots"></div>
         <button class="newnet" id="bNewNet"><span style="font-size:18px;line-height:1">+</span> New net <span class="kbd">N</span></button>
       </section>
       <section style="display:flex;flex-direction:column;gap:10px">
         <div class="shead"><h2>Parts drawer</h2><span>click, then click the board</span></div>
+        <input class="search" id="partSearch" type="search" placeholder="Search parts" aria-label="Search parts">
         <div class="parts" id="parts"></div>
       </section>
     </aside>
   </div>
 
   <footer>
-    <span id="fName">little-blinker.pcbp</span>
+    <span id="fName"></span>
     <span id="fBoard"></span>
     <span id="fCounts"></span>
     <span id="fCursor"></span>
@@ -167,387 +119,26 @@ footer .push{margin-left:auto}
   </footer>
 </div>
 
-<script>
-/* ============================================================
-   PCB Paint — prototype
-   Units: 1 board unit = 0.1 mm
-   ============================================================ */
-const PALETTE=['#FF6B4A','#3D7BFD','#A35BFF','#12B5A5','#FFB020','#FF5DA2','#7CC243','#0EA5C6','#E0569B','#8C6D3F','#5B6CFF','#D9480F'];
-const FP={
-  soic8:{label:'NE555',pkg:'SOIC-8',prefix:'U',body:[56,80],pads:[[-42,-30,22,10,'r',1],[-42,-10,22,10,'r',2],[-42,10,22,10,'r',3],[-42,30,22,10,'r',4],[42,30,22,10,'r',5],[42,10,22,10,'r',6],[42,-10,22,10,'r',7],[42,-30,22,10,'r',8]]},
-  r0805:{label:'Resistor',pkg:'0805',prefix:'R',body:[16,22],pads:[[0,-20,14,12,'r',1],[0,20,14,12,'r',2]]},
-  c0805:{label:'Capacitor',pkg:'0805',prefix:'C',body:[16,14],pads:[[0,-15,14,12,'r',1],[0,15,14,12,'r',2]]},
-  c1206:{label:'Big cap',pkg:'1206',prefix:'C',body:[20,20],pads:[[0,-20,16,14,'r',1],[0,20,16,14,'r',2]]},
-  led5:{label:'LED',pkg:'5 mm',prefix:'LED',body:[40,40],round:true,pads:[[-15,0,16,16,'r',1],[15,0,16,16,'c',2]]},
-  hdr2:{label:'Header',pkg:'2-pin',prefix:'J',body:[28,58],pads:[[0,-15,18,18,'r',1],[0,15,18,18,'c',2]]},
-  pot:{label:'Pot',pkg:'9 mm',prefix:'RV',body:[56,56],round:true,pads:[[-20,36,12,12,'c',1],[0,36,12,12,'c',2],[20,36,12,12,'c',3]]},
-  jack:{label:'Jack',pkg:'3.5 mm',prefix:'J',body:[36,36],round:true,pads:[[0,-26,12,12,'c',1],[0,8,12,12,'c',2],[0,26,12,12,'c',3]]},
-  button:{label:'Button',pkg:'6 mm',prefix:'SW',body:[30,40],pads:[[-22,-16,12,12,'c',1],[22,-16,12,12,'c',2],[-22,16,12,12,'c',3],[22,16,12,12,'c',4]]}
-};
+<dialog id="makeDlg">
+  <form method="dialog">
+    <div class="dhead"><h2>Make it</h2><button class="x" value="close" aria-label="Close">×</button></div>
+    <label class="dname">Board name <input id="dName" spellcheck="false"></label>
+    <p class="dsub">Who's making it?</p>
+    <div class="presets" id="presets"></div>
+    <div class="dcheck" id="dCheck"></div>
+    <div class="dbtns">
+      <button type="button" class="hbtn primary" id="bGerber">Download Gerbers + drill (.zip)</button>
+      <button type="button" class="hbtn" id="bSvgTop">Top copper SVG</button>
+      <button type="button" class="hbtn" id="bSvgBot">Bottom copper SVG (mirrored)</button>
+    </div>
+    <p class="dnote">Net colours are only for you; all copper is copper. Files are Gerber RS-274X with X2 attributes plus an Excellon drill file, in mm, with the origin at the board's bottom-left corner.</p>
+  </form>
+</dialog>
 
-function seed(){
-  return {
-    v:1, name:'little-blinker', seq:100,
-    board:{x:60,y:70,w:460,h:270,r:26},
-    nets:[{id:'n1',name:'VCC',color:PALETTE[0]},{id:'n2',name:'GND',color:PALETTE[1]},{id:'n3',name:'DISCHARGE',color:PALETTE[2]},{id:'n4',name:'TRIG · THRES',color:PALETTE[3]},{id:'n5',name:'OUT',color:PALETTE[4]}],
-    parts:[
-      {id:'p1',ref:'U1',fp:'soic8',x:300,y:200,rot:0},{id:'p2',ref:'J1',fp:'hdr2',x:110,y:125,rot:0},
-      {id:'p3',ref:'C3',fp:'c0805',x:200,y:125,rot:0},{id:'p4',ref:'R1',fp:'r0805',x:410,y:130,rot:0},
-      {id:'p5',ref:'R2',fp:'r0805',x:410,y:210,rot:0},{id:'p6',ref:'C1',fp:'c1206',x:470,y:250,rot:0},
-      {id:'p7',ref:'C2',fp:'c0805',x:357,y:280,rot:90},{id:'p8',ref:'R3',fp:'r0805',x:190,y:300,rot:90},
-      {id:'p9',ref:'LED1',fp:'led5',x:125,y:300,rot:0}
-    ],
-    traces:[
-      {id:'t1',net:'n1',width:8,pts:[[110,110],[410,110]]},
-      {id:'t2',net:'n1',width:6,pts:[[342,110],[342,170]]},
-      {id:'t3',net:'n2',width:8,pts:[[110,140],[230,140],[230,170],[258,170]]},
-      {id:'t4',net:'n2',width:8,pts:[[110,140],[110,300]]},
-      {id:'t5',net:'n3',width:5,pts:[[342,190],[410,190]]},
-      {id:'t6',net:'n3',width:5,pts:[[410,150],[410,190]]}
-    ]
-  };
-}
-
-const LS='pcbpaint-v1';
-function load(){try{const s=localStorage.getItem(LS);return s?JSON.parse(s):null}catch(e){return null}}
-function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
-
-let S=load()||seed();
-const UI={tool:'brush',width:6,corners:'round',tidy:true,snap:true,shove:true,clear:2.5,
-  selNet:S.nets[0]?S.nets[0].id:null,arming:null,armRot:0,
-  vb:{x:40,y:50,w:520,h:310},cursor:null,hover:null,drag:null,preview:null,marks:[],marksUntil:0};
-const hist=[],fut=[];
-function snapshot(){hist.push(JSON.stringify(S));if(hist.length>150)hist.shift();fut.length=0}
-function undo(){if(!hist.length)return toast('Nothing to undo');fut.push(JSON.stringify(S));S=JSON.parse(hist.pop());fixSel();changed()}
-function redo(){if(!fut.length)return toast('Nothing to redo');hist.push(JSON.stringify(S));S=JSON.parse(fut.pop());fixSel();changed()}
-function fixSel(){if(!S.nets.find(n=>n.id===UI.selNet))UI.selNet=S.nets[0]?S.nets[0].id:null}
-
-/* ---------------- geometry ---------------- */
-const hyp=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
-function closestSeg(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy;let t=L?((p[0]-a[0])*dx+(p[1]-a[1])*dy)/L:0;t=Math.max(0,Math.min(1,t));const q=[a[0]+dx*t,a[1]+dy*t];return{d:hyp(p,q),q,t}}
-const segDist=(p,a,b)=>closestSeg(p,a,b).d;
-function closestPoly(p,P){if(P.length===1)return{d:hyp(p,P[0]),q:P[0]};let best={d:Infinity};for(let i=0;i<P.length-1;i++){const c=closestSeg(p,P[i],P[i+1]);if(c.d<best.d)best=c}return best}
-function segInt(a,b,c,d){const r=[b[0]-a[0],b[1]-a[1]],s=[d[0]-c[0],d[1]-c[1]];const den=r[0]*s[1]-r[1]*s[0];if(Math.abs(den)<1e-9)return null;const t=((c[0]-a[0])*s[1]-(c[1]-a[1])*s[0])/den,u=((c[0]-a[0])*r[1]-(c[1]-a[1])*r[0])/den;if(t>=0&&t<=1&&u>=0&&u<=1)return{p:[a[0]+t*r[0],a[1]+t*r[1]],t};return null}
-function segSegDist(a,b,c,d){if(segInt(a,b,c,d))return 0;return Math.min(segDist(a,c,d),segDist(b,c,d),segDist(c,a,b),segDist(d,a,b))}
-function polyDist(A,B){let m=Infinity;for(let i=0;i<A.length-1;i++)for(let j=0;j<B.length-1;j++){const d=segSegDist(A[i],A[i+1],B[j],B[j+1]);if(d<m)m=d}return m}
-function pointRectDist(p,r){const dx=Math.max(r.x0-p[0],0,p[0]-r.x1),dy=Math.max(r.y0-p[1],0,p[1]-r.y1);return Math.hypot(dx,dy)}
-const inRect=(p,r,m=0)=>p[0]>=r.x0-m&&p[0]<=r.x1+m&&p[1]>=r.y0-m&&p[1]<=r.y1+m;
-function segRectDist(a,b,r){if(inRect(a,r)||inRect(b,r))return 0;const C=[[r.x0,r.y0],[r.x1,r.y0],[r.x1,r.y1],[r.x0,r.y1]];for(let i=0;i<4;i++)if(segInt(a,b,C[i],C[(i+1)%4]))return 0;return Math.min(pointRectDist(a,r),pointRectDist(b,r),...C.map(c=>segDist(c,a,b)))}
-function polyRectDist(P,r){if(P.length===1)return pointRectDist(P[0],r);let m=Infinity;for(let i=0;i<P.length-1;i++)m=Math.min(m,segRectDist(P[i],P[i+1],r));return m}
-function rdp(P,eps){if(P.length<3)return P.map(p=>p.slice());let dm=0,ix=0;const a=P[0],b=P[P.length-1];for(let i=1;i<P.length-1;i++){const d=segDist(P[i],a,b);if(d>dm){dm=d;ix=i}}if(dm>eps){const l=rdp(P.slice(0,ix+1),eps),r=rdp(P.slice(ix),eps);return l.slice(0,-1).concat(r)}return[a.slice(),b.slice()]}
-function resample(P,step){if(P.length<2)return P.map(p=>p.slice());const o=[P[0].slice()];for(let i=0;i<P.length-1;i++){const a=P[i],b=P[i+1],L=hyp(a,b),n=Math.max(1,Math.ceil(L/step));for(let k=1;k<=n;k++)o.push([a[0]+(b[0]-a[0])*k/n,a[1]+(b[1]-a[1])*k/n])}return o}
-function chaikin(P,it,r){for(let k=0;k<it;k++){if(P.length<3)return P;const Q=[P[0]];for(let i=0;i<P.length-1;i++){const a=P[i],b=P[i+1];if(i>0)Q.push([a[0]+(b[0]-a[0])*r,a[1]+(b[1]-a[1])*r]);if(i<P.length-2)Q.push([a[0]+(b[0]-a[0])*(1-r),a[1]+(b[1]-a[1])*(1-r)])}Q.push(P[P.length-1]);P=Q}return P}
-function mergeCollinear(P){const o=[P[0]];for(let i=1;i<P.length;i++){const p=P[i];if(hyp(p,o[o.length-1])<1)continue;if(o.length>=2){const a=o[o.length-2],b=o[o.length-1];const cr=(b[0]-a[0])*(p[1]-b[1])-(b[1]-a[1])*(p[0]-b[0]);if(Math.abs(cr)<1e-6*Math.max(1,hyp(a,b)*hyp(b,p))+0.5&&((b[0]-a[0])*(p[0]-b[0])+(b[1]-a[1])*(p[1]-b[1]))>0){o[o.length-1]=p;continue}}o.push(p)}return o}
-function octi(P){const o=[P[0]];for(let i=0;i<P.length-1;i++){const a=P[i],b=P[i+1],dx=b[0]-a[0],dy=b[1]-a[1],ax=Math.abs(dx),ay=Math.abs(dy);if(ax<2||ay<2||Math.abs(ax-ay)<2){o.push(b);continue}const d=Math.min(ax,ay);const m=ax>ay?[a[0]+Math.sign(dx)*(ax-d),a[1]]:[a[0],a[1]+Math.sign(dy)*(ay-d)];o.push(m,b)}return mergeCollinear(o)}
-function pathLen(P){let L=0;for(let i=0;i<P.length-1;i++)L+=hyp(P[i],P[i+1]);return L}
-function trimEnd(P,len){let rem=len;const Q=P.map(p=>p.slice());while(Q.length>1&&rem>0){const a=Q[Q.length-2],b=Q[Q.length-1],L=hyp(a,b);if(L<=rem){Q.pop();rem-=L}else{const t=(L-rem)/L;Q[Q.length-1]=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];rem=0}}return Q}
-
-/* ---------------- model helpers ---------------- */
-function rotP(dx,dy,rot){switch(((rot%360)+360)%360){case 90:return[-dy,dx];case 180:return[-dx,-dy];case 270:return[dy,-dx];default:return[dx,dy]}}
-function padsOf(part){const f=FP[part.fp];const sw=part.rot%180!==0;return f.pads.map(([dx,dy,w,h,s,n])=>{const[rx,ry]=rotP(dx,dy,part.rot);const W=sw?h:w,H=sw?w:h,x=part.x+rx,y=part.y+ry;return{key:part.id+':'+n,part,n,x,y,w:W,h:H,s,x0:x-W/2,y0:y-H/2,x1:x+W/2,y1:y+H/2}})}
-function allPads(){return S.parts.flatMap(padsOf)}
-function bodyOf(part){const f=FP[part.fp];const sw=part.rot%180!==0;const w=sw?f.body[1]:f.body[0],h=sw?f.body[0]:f.body[1];return{x0:part.x-w/2,y0:part.y-h/2,x1:part.x+w/2,y1:part.y+h/2,round:f.round,w,h}}
-function partBox(part){const b=bodyOf(part);let r={x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1};for(const p of padsOf(part)){r.x0=Math.min(r.x0,p.x0);r.y0=Math.min(r.y0,p.y0);r.x1=Math.max(r.x1,p.x1);r.y1=Math.max(r.y1,p.y1)}return r}
-const netById=id=>S.nets.find(n=>n.id===id);
-const netName=id=>(netById(id)||{name:'?'}).name;
-const netColor=id=>(netById(id)||{color:'#888'}).color;
-
-/* Pad nets are derived: a pad belongs to whatever net touches it. */
-function padNets(traces=S.traces){const map={},conf=new Set(),pads=allPads();for(const t of traces)for(const pd of pads){if(polyRectDist(t.pts,pd)<=t.width/2-0.3){if(map[pd.key]&&map[pd.key]!==t.net)conf.add(pd.key);else map[pd.key]=t.net}}return{map,conf}}
-
-function whatsAt(p){const nets=padNets();const pads=allPads();let pad=null;for(const pd of pads)if(inRect(p,pd,2)){pad=pd;break}
-  if(pad){const pn=nets.map[pad.key]||null;return{pad,padNet:pn,net:pn}}
-  for(let i=S.traces.length-1;i>=0;i--){const t=S.traces[i];if(closestPoly(p,t.pts).d<=t.width/2+2)return{trace:t,net:t.net}}
-  return{}}
-function partAt(p){for(let i=S.parts.length-1;i>=0;i--)if(inRect(p,partBox(S.parts[i]),2))return S.parts[i];return null}
-
-function addNet(name){snapshot();const used=new Set(S.nets.map(n=>n.color.toUpperCase()));let color=PALETTE.find(c=>!used.has(c.toUpperCase()));if(!color){const h=Math.floor(Math.random()*360);color=hslHex(h,75,55)}
-  const n={id:'n'+(S.seq++),name:name||('NET '+(S.nets.length+1)),color};S.nets.push(n);UI.selNet=n.id;changed();return n}
-function hslHex(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return'#'+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('')}
-
-/* ---------------- stroke pipeline ---------------- */
-function tidy(raw){
-  if(!UI.tidy)return rdp(raw,0.8);
-  if(UI.corners==='free')return chaikin(rdp(raw,2),2,0.25);
-  let P=octi(rdp(raw,4));
-  if(UI.corners==='round')P=chaikin(P,2,0.2);
-  return P;
-}
-function trimAtPads(P,pads,w){if(P.length<2||!pads.length)return{pts:P};const R=resample(P,2);for(let i=1;i<R.length;i++){for(const pd of pads){if(pointRectDist(R[i],pd)<w/2+UI.clear){const keep=R.slice(0,Math.max(1,i-1)+1);return{pts:rdp(keep,0.5),cut:true,pad:pd}}}}return{pts:P}}
-function trimAtCross(P,foreign,w){for(let k=0;k<P.length-1;k++){let best=null;for(const t of foreign)for(let j=0;j<t.pts.length-1;j++){const X=segInt(P[k],P[k+1],t.pts[j],t.pts[j+1]);if(X&&(!best||X.t<best.t))best={t:X.t,p:X.p,tr:t}}
-  if(best){let path=P.slice(0,k+1).map(p=>p.slice());path.push(best.p);path=trimEnd(path,w/2+best.tr.width/2+UI.clear);return{pts:path,cut:true,t:best.tr}}}return{pts:P}}
-
-/* Shove: push the victim's free points out of the aggressor's keep-out,
-   then relax nearby points so it bends smoothly. Pads never move. */
-function shoveTrace(vpts,vw,apts,aw,pads){
-  if(apts.length<2)return null;
-  const req=aw/2+vw/2+UI.clear;
-  if(polyDist(vpts,apts)>=req-0.05)return null;
-  let P=resample(vpts,2.5);
-  const fixed=P.map((p,i)=>i===0||i===P.length-1||pads.some(pd=>inRect(p,pd,0)));
-  const pushPass=()=>{let any=false;for(let i=1;i<P.length-1;i++){if(fixed[i])continue;const c=closestPoly(P[i],apts);if(c.d<req){let nx=P[i][0]-c.q[0],ny=P[i][1]-c.q[1],L=Math.hypot(nx,ny);if(L<1e-3){const a=P[i-1],b=P[i+1];nx=-(b[1]-a[1]);ny=b[0]-a[0];L=Math.hypot(nx,ny)||1}const k=(req-c.d)+0.35;P[i]=[P[i][0]+nx/L*k,P[i][1]+ny/L*k];any=true}}return any};
-  if(!pushPass())return null;
-  for(let it=0;it<8;it++){
-    for(let s=0;s<2;s++){const Q=P.map(p=>p.slice());for(let i=1;i<P.length-1;i++){if(fixed[i])continue;if(closestPoly(P[i],apts).d<req*3)Q[i]=[P[i][0]*0.5+(P[i-1][0]+P[i+1][0])*0.25,P[i][1]*0.5+(P[i-1][1]+P[i+1][1])*0.25]}P=Q}
-    pushPass();
-  }
-  return rdp(P,0.6);
-}
-
-function computeEffect(raw,net,w,final){
-  let pts=final?tidy(raw):(raw.length>2?rdp(raw,0.8):raw.map(p=>p.slice()));
-  let note='';
-  const nets=padNets();
-  const foreignPads=allPads().filter(pd=>nets.map[pd.key]&&nets.map[pd.key]!==net);
-  const r=trimAtPads(pts,foreignPads,w);
-  if(r.cut){pts=r.pts;note=`Stopped short of ${r.pad.part.ref} — that pad is on ${netName(nets.map[r.pad.key])}`}
-  const foreign=S.traces.filter(t=>t.net!==net);
-  const c=trimAtCross(pts,foreign,w);
-  if(c.cut){pts=c.pts;note=`Can't cross ${netName(c.t.net)} on one layer — go around it`}
-  const victims=new Map();
-  if(UI.shove&&pts.length>=2&&pathLen(pts)>1){
-    const pads=allPads();
-    for(const t of foreign){const res=shoveTrace(t.pts,t.width,pts,w,pads);if(res)victims.set(t.id,res)}
-    for(const[id,vp]of[...victims]){const vt=S.traces.find(t=>t.id===id);for(const t of S.traces){if(t.id===id||t.net===vt.net||t.net===net)continue;const cur=victims.get(t.id)||t.pts;const res=shoveTrace(cur,t.width,vp,vt.width,pads);if(res)victims.set(t.id,res)}}
-  }
-  return{pts,victims,note};
-}
-
-/* ---------------- rendering ---------------- */
-const svg=document.getElementById('svg');
-let rafPending=false;
-function schedule(){if(!rafPending){rafPending=true;requestAnimationFrame(()=>{rafPending=false;render()})}}
-const dPath=P=>P.length?'M'+P.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L'):'';
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-function render(){
-  const vb=UI.vb;svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
-  const B=S.board;const nets=padNets(previewTraces());
-  let h=`<defs><pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#2A4A3D" stroke-width="2.4"/></pattern></defs>`;
-  h+=`<rect x="${B.x+4}" y="${B.y+7}" width="${B.w}" height="${B.h}" rx="${B.r}" fill="#0E1A15" opacity=".22"/>`;
-  h+=`<rect x="${B.x}" y="${B.y}" width="${B.w}" height="${B.h}" rx="${B.r}" fill="#1E3B30" stroke="#0E1F18" stroke-width="2"/>`;
-  h+=`<rect x="${B.x+10}" y="${B.y+10}" width="${B.w-20}" height="${B.h-20}" rx="${B.r-7}" fill="url(#hatch)" opacity=".5"/>`;
-  // silk
-  h+='<g fill="none" stroke="#F2F5F1" stroke-width="1.2">';
-  for(const p of S.parts){const b=bodyOf(p);h+=b.round?`<circle cx="${p.x}" cy="${p.y}" r="${b.w/2}"/>`:`<rect x="${b.x0}" y="${b.y0}" width="${b.w}" height="${b.h}" rx="2"/>`}
-  h+='</g><g fill="#F2F5F1" font-family="DM Mono, monospace" font-size="8" text-anchor="middle">';
-  for(const p of S.parts){const bx=partBox(p);h+=`<text x="${p.x}" y="${bx.y0-4}">${esc(p.ref)}</text>`}
-  h+='</g>';
-  // traces
-  const pv=UI.preview,victims=pv?pv.victims:new Map();
-  h+='<g fill="none" stroke-linecap="round" stroke-linejoin="round">';
-  for(const t of S.traces){
-    if(victims.has(t.id)){h+=`<path d="${dPath(t.pts)}" stroke="${netColor(t.net)}" stroke-width="${t.width}" opacity=".18" stroke-dasharray="2 3"/>`;h+=`<path d="${dPath(victims.get(t.id))}" stroke="${netColor(t.net)}" stroke-width="${t.width}"/>`}
-    else h+=`<path d="${dPath(t.pts)}" stroke="${netColor(t.net)}" stroke-width="${t.width}"/>`;
-  }
-  if(pv&&UI.drag&&UI.drag.type==='stroke'){const d=UI.drag;h+=`<path d="${dPath(pv.pts)}" stroke="${netColor(d.net)}" stroke-width="${d.width}" opacity=".9"/>`;
-    if(d.raw.length>1)h+=`<path d="${dPath(d.raw)}" stroke="#FFFFFF" stroke-width="1" opacity=".35"/>`}
-  h+='</g>';
-  // pads
-  for(const pd of allPads()){const n=nets.map[pd.key];const st=nets.conf.has(pd.key)?'#FF3B30':(n?netColor(n):'#8A9099');const sw=nets.conf.has(pd.key)?3:1.6;
-    h+=pd.s==='c'?`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.w/2}" fill="#E8C27A" stroke="${st}" stroke-width="${sw}"/><circle cx="${pd.x}" cy="${pd.y}" r="${pd.w/5}" fill="#0E1F18"/>`
-      :`<rect x="${pd.x0}" y="${pd.y0}" width="${pd.w}" height="${pd.h}" rx="2" fill="#E8C27A" stroke="${st}" stroke-width="${sw}"/>`}
-  // drc marks
-  if(UI.marks.length&&performance.now()<UI.marksUntil){for(const m of UI.marks)h+=`<circle cx="${m[0]}" cy="${m[1]}" r="9" fill="none" stroke="#FF3B30" stroke-width="2"/><circle cx="${m[0]}" cy="${m[1]}" r="14" fill="none" stroke="#FF3B30" stroke-width="1" opacity=".5"/>`}
-  // ghost part
-  if(UI.arming&&UI.cursor){const g={id:'ghost',ref:'',fp:UI.arming,x:Math.round(UI.cursor[0]),y:Math.round(UI.cursor[1]),rot:UI.armRot};h+='<g opacity=".6">';const b=bodyOf(g);h+=b.round?`<circle cx="${g.x}" cy="${g.y}" r="${b.w/2}" fill="none" stroke="#fff" stroke-dasharray="3 2"/>`:`<rect x="${b.x0}" y="${b.y0}" width="${b.w}" height="${b.h}" fill="none" stroke="#fff" stroke-dasharray="3 2"/>`;for(const pd of padsOf(g))h+=pd.s==='c'?`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.w/2}" fill="#E8C27A"/>`:`<rect x="${pd.x0}" y="${pd.y0}" width="${pd.w}" height="${pd.h}" fill="#E8C27A"/>`;h+='</g>'}
-  // brush cursor
-  if(UI.tool==='brush'&&UI.cursor&&!UI.arming){const c=UI.cursor;const drawing=UI.drag&&UI.drag.type==='stroke';const net=drawing?UI.drag.net:((UI.hover&&UI.hover.net)||UI.selNet);const col=net?netColor(net):'#fff';const r=Math.max(3,UI.width/2);
-    h+=`<circle cx="${c[0]}" cy="${c[1]}" r="${r+2}" fill="${col}" fill-opacity=".18" stroke="#fff" stroke-width="1.2"/><circle cx="${c[0]}" cy="${c[1]}" r="1.4" fill="#fff"/>`;
-    if(net&&!drawing){const lbl=netName(net)+((UI.hover&&UI.hover.net)?' (picked up)':'');const tw=lbl.length*4.6+20;h+=`<g transform="translate(${c[0]+r+6} ${c[1]-8})"><rect width="${tw}" height="16" rx="5" fill="#16191D"/><circle cx="8" cy="8" r="3" fill="${col}"/><text x="14" y="11" fill="#fff" font-size="7.5" font-family="Bricolage Grotesque, sans-serif" font-weight="700">${esc(lbl)}</text></g>`}}
-  svg.innerHTML=h;
-  renderChrome(nets);
-}
-function previewTraces(){const pv=UI.preview;if(!pv||!UI.drag||UI.drag.type!=='stroke')return S.traces;const arr=S.traces.map(t=>pv.victims.has(t.id)?{...t,pts:pv.victims.get(t.id)}:t);if(pv.pts.length>1)arr.push({id:'_p',net:UI.drag.net,width:UI.drag.width,pts:pv.pts});return arr}
-
-function renderChrome(nets){
-  const n=netById(UI.selNet);
-  document.getElementById('curNet').innerHTML=n?`<span class="dot" style="background:${n.color}"></span>${UI.tool==='brush'?'Brush':UI.tool==='move'?'Move':'Eraser'} · ${esc(n.name)}`:'No net yet — press N';
-  const z=Math.round(520/UI.vb.w*100);document.getElementById('zLbl').textContent=z+'%';
-  const conf=nets.conf.size;
-  document.getElementById('status').innerHTML=conf?`<span class="warn" style="color:#FF8A80">●</span> ${conf} pad${conf>1?'s':''} touched by two nets`:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7CC243" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4.5 4.5L19 7"/></svg> ${S.traces.length} strokes · ${S.nets.length} nets`;
-  document.getElementById('fBoard').textContent=`Board ${(S.board.w/10).toFixed(0)} × ${(S.board.h/10).toFixed(0)} mm`;
-  document.getElementById('fCounts').textContent=`${S.parts.length} parts · ${S.traces.length} strokes`;
-  if(UI.cursor)document.getElementById('fCursor').textContent=`Cursor ${((UI.cursor[0]-S.board.x)/10).toFixed(1)}, ${((UI.cursor[1]-S.board.y)/10).toFixed(1)} mm`;
-  // live pot stats
-  const counts={};for(const k in nets.map)counts[nets.map[k]]=(counts[nets.map[k]]||0)+1;
-  document.querySelectorAll('.pot').forEach(el=>{const id=el.dataset.id;const st=el.querySelector('.pstat');const strokes=S.traces.filter(t=>t.net===id).length;st.textContent=`${counts[id]||0} pads · ${strokes} stroke${strokes===1?'':'s'}`;el.classList.toggle('sel',id===UI.selNet)});
-}
-
-function renderPots(){
-  const box=document.getElementById('pots');
-  box.innerHTML=S.nets.map((n,i)=>`<div class="pot" data-id="${n.id}">
-    <span class="pkey">${i<9?i+1:''}</span>
-    <label class="swatch" style="background:${n.color}" title="Change colour"><input type="color" value="${n.color}" aria-label="Colour for ${esc(n.name)}"></label>
-    <span class="pinfo"><input class="pname" value="${esc(n.name)}" aria-label="Net name" spellcheck="false"><span class="pstat"></span></span>
-    <button class="pdel" aria-label="Delete ${esc(n.name)}">×</button></div>`).join('')||'<p style="margin:0;font-size:13px;color:#5A626D">No nets yet. Add one, or just start painting.</p>';
-  schedule();
-}
-function renderParts(){
-  document.getElementById('parts').innerHTML=Object.entries(FP).map(([k,f])=>{
-    const xs=f.pads.map(p=>[p[0]-p[2]/2,p[0]+p[2]/2]).flat().concat([-f.body[0]/2,f.body[0]/2]),ys=f.pads.map(p=>[p[1]-p[3]/2,p[1]+p[3]/2]).flat().concat([-f.body[1]/2,f.body[1]/2]);
-    const x0=Math.min(...xs)-3,x1=Math.max(...xs)+3,y0=Math.min(...ys)-3,y1=Math.max(...ys)+3;
-    const body=f.round?`<circle cx="0" cy="0" r="${f.body[0]/2}" fill="none" stroke="#5A626D" stroke-width="1.6"/>`:`<rect x="${-f.body[0]/2}" y="${-f.body[1]/2}" width="${f.body[0]}" height="${f.body[1]}" fill="none" stroke="#5A626D" stroke-width="1.6"/>`;
-    const pads=f.pads.map(([x,y,w,hh,s])=>s==='c'?`<circle cx="${x}" cy="${y}" r="${w/2}" fill="#D7A748"/>`:`<rect x="${x-w/2}" y="${y-hh/2}" width="${w}" height="${hh}" fill="#D7A748"/>`).join('');
-    return`<button data-fp="${k}" aria-pressed="${UI.arming===k}"><svg width="48" height="36" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" aria-hidden="true">${body}${pads}</svg><b>${f.label}</b><small>${f.pkg}</small></button>`}).join('');
-}
-function changed(){save();renderPots();renderParts();schedule()}
-
-/* ---------------- interaction ---------------- */
-function toB(e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const m=svg.getScreenCTM();if(!m)return[0,0];const q=pt.matrixTransform(m.inverse());return[q.x,q.y]}
-let spaceDown=false;
-
-svg.addEventListener('pointerdown',e=>{
-  const p=toB(e);
-  if(e.button===1||(e.button===0&&spaceDown)){startPan(e);return}
-  if(e.button!==0)return;
-  svg.setPointerCapture(e.pointerId);
-  if(UI.arming){placePart(p,e.shiftKey);return}
-  if(UI.tool==='brush')startStroke(p);
-  else if(UI.tool==='erase'){snapshot();UI.drag={type:'erase',changed:false};eraseAt(p)}
-  else if(UI.tool==='move'){const part=partAt(p);if(part)startMove(part,p);else startPan(e)}
-  schedule();
-});
-svg.addEventListener('pointermove',e=>{
-  const p=toB(e);UI.cursor=p;const d=UI.drag;
-  if(d&&d.type==='stroke'){const l=d.raw[d.raw.length-1];if(hyp(p,l)>1.2){d.raw.push(p);UI.preview=computeEffect(d.raw,d.net,d.width,false)}}
-  else if(d&&d.type==='erase')eraseAt(p);
-  else if(d&&d.type==='move')moveTo(p);
-  else if(d&&d.type==='pan')panTo(e);
-  else UI.hover=UI.tool==='brush'?whatsAt(p):null;
-  schedule();
-});
-svg.addEventListener('pointerleave',()=>{if(!UI.drag){UI.cursor=null;schedule()}});
-window.addEventListener('pointerup',e=>{
-  const d=UI.drag;if(!d)return;UI.drag=null;
-  if(d.type==='stroke')finishStroke(d);
-  else if(d.type==='erase'){if(!d.changed)hist.pop();else changed()}
-  else if(d.type==='move'){if(!d.moved)hist.pop();else changed()}
-  UI.preview=null;schedule();
-});
-
-function startStroke(p){
-  const info=whatsAt(p);
-  let net=info.net||UI.selNet;
-  if(!net)net=addNet().id;
-  if(info.net&&info.net!==UI.selNet)flashPot(info.net);
-  UI.selNet=net;
-  let start=p;
-  if(UI.snap&&info.pad&&(!info.padNet||info.padNet===net))start=[info.pad.x,info.pad.y];
-  UI.drag={type:'stroke',net,raw:[start],width:UI.width};
-  UI.preview={pts:[start],victims:new Map(),note:''};
-  renderChrome(padNets());
-}
-function finishStroke(d){
-  const raw=d.raw.slice();
-  if(raw.length<2||pathLen(raw)<3)return;
-  const end=whatsAt(raw[raw.length-1]);
-  if(UI.snap&&end.pad&&(!end.padNet||end.padNet===d.net))raw[raw.length-1]=[end.pad.x,end.pad.y];
-  const eff=computeEffect(raw,d.net,d.width,true);
-  if(eff.pts.length<2||pathLen(eff.pts)<3){toast(eff.note||'Stroke too short');return}
-  snapshot();
-  for(const[id,pts]of eff.victims){const t=S.traces.find(t=>t.id===id);if(t)t.pts=pts}
-  S.traces.push({id:'t'+(S.seq++),net:d.net,width:d.width,pts:eff.pts.map(p=>[+p[0].toFixed(2),+p[1].toFixed(2)])});
-  if(eff.note)toast(eff.note);
-  else if(eff.victims.size){const names=[...new Set([...eff.victims.keys()].map(id=>netName(S.traces.find(t=>t.id===id).net)))];toast(`Nudged ${names.join(', ')} out of the way`)}
-  changed();
-}
-function eraseAt(p){const before=S.traces.length;S.traces=S.traces.filter(t=>closestPoly(p,t.pts).d>t.width/2+3);if(S.traces.length!==before){UI.drag.changed=true;save();renderChrome(padNets())}}
-function startMove(part,p){snapshot();const pads=padsOf(part);const attach=[];S.traces.forEach(t=>t.pts.forEach((q,i)=>{if(pads.some(pd=>inRect(q,pd,1)))attach.push([t.id,i,q.slice()])}));UI.drag={type:'move',part:S.parts.find(x=>x.id===part.id),start:p,ox:part.x,oy:part.y,attach,moved:false};svg.style.cursor='grabbing'}
-function moveTo(p){const d=UI.drag;const dx=Math.round(p[0]-d.start[0]),dy=Math.round(p[1]-d.start[1]);d.part.x=d.ox+dx;d.part.y=d.oy+dy;for(const[id,i,o]of d.attach){const t=S.traces.find(t=>t.id===id);if(t&&t.pts[i])t.pts[i]=[o[0]+dx,o[1]+dy]}d.moved=d.moved||dx!==0||dy!==0}
-function startPan(e){UI.drag={type:'pan',cx:e.clientX,cy:e.clientY,vx:UI.vb.x,vy:UI.vb.y}}
-function panTo(e){const d=UI.drag;const r=svg.getBoundingClientRect();const s=Math.max(UI.vb.w/r.width,UI.vb.h/r.height);UI.vb.x=d.vx-(e.clientX-d.cx)*s;UI.vb.y=d.vy-(e.clientY-d.cy)*s}
-function placePart(p,keep){const f=FP[UI.arming];snapshot();const used=S.parts.filter(x=>x.ref.startsWith(f.prefix)).map(x=>parseInt(x.ref.slice(f.prefix.length))||0);const ref=f.prefix+(Math.max(0,...used)+1);
-  S.parts.push({id:'p'+(S.seq++),ref,fp:UI.arming,x:Math.round(p[0]),y:Math.round(p[1]),rot:UI.armRot});toast(`Placed ${ref}${keep?' — shift-click to keep placing':''}`);if(!keep)UI.arming=null;changed()}
-function zoomAt(f,cx,cy){const vb=UI.vb;const nw=Math.max(60,Math.min(2000,vb.w*f));const k=nw/vb.w;if(cx==null){cx=vb.x+vb.w/2;cy=vb.y+vb.h/2}vb.x=cx-(cx-vb.x)*k;vb.y=cy-(cy-vb.y)*k;vb.w=nw;vb.h=vb.h*k;schedule()}
-svg.addEventListener('wheel',e=>{e.preventDefault();const p=toB(e);zoomAt(e.deltaY>0?1.12:1/1.12,p[0],p[1])},{passive:false});
-
-function flashPot(id){requestAnimationFrame(()=>{const el=document.querySelector(`.pot[data-id="${id}"]`);if(el)el.animate([{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:220})})}
-let toastT;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600)}
-
-function setTool(t){UI.tool=t;UI.arming=null;document.querySelectorAll('nav.tools button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tool===t));svg.className.baseVal=t;svg.style.cursor='';renderParts();schedule()}
-document.querySelectorAll('nav.tools button').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
-
-/* pots */
-const pots=document.getElementById('pots');
-pots.addEventListener('click',e=>{const row=e.target.closest('.pot');if(!row)return;const id=row.dataset.id;
-  if(e.target.closest('.pdel')){const n=netById(id);const used=S.traces.filter(t=>t.net===id).length;if(used&&!confirm(`Delete ${n.name} and its ${used} stroke${used>1?'s':''}?`))return;snapshot();S.traces=S.traces.filter(t=>t.net!==id);S.nets=S.nets.filter(x=>x.id!==id);fixSel();changed();return}
-  UI.selNet=id;if(UI.tool!=='brush')setTool('brush');schedule()});
-pots.addEventListener('focusin',e=>{const row=e.target.closest('.pot');if(row&&e.target.classList.contains('pname')){UI.selNet=row.dataset.id;schedule()}});
-pots.addEventListener('change',e=>{const row=e.target.closest('.pot');if(!row)return;const n=netById(row.dataset.id);
-  if(e.target.classList.contains('pname')){const v=e.target.value.trim()||n.name;if(v!==n.name){snapshot();n.name=v;changed()}}
-  if(e.target.type==='color'){snapshot();n.color=e.target.value;changed()}});
-pots.addEventListener('input',e=>{if(e.target.type==='color'){const row=e.target.closest('.pot');const n=netById(row.dataset.id);n.color=e.target.value;row.querySelector('.swatch').style.background=n.color;schedule()}});
-pots.addEventListener('keydown',e=>{if(e.target.classList.contains('pname')&&e.key==='Enter')e.target.blur()});
-function newNetUI(){const n=addNet();requestAnimationFrame(()=>{const inp=document.querySelector(`.pot[data-id="${n.id}"] .pname`);if(inp){inp.focus();inp.select()}});toast(`${n.name} added — type a name, then paint`)}
-document.getElementById('bNewNet').onclick=newNetUI;
-
-/* parts */
-document.getElementById('parts').addEventListener('click',e=>{const b=e.target.closest('button[data-fp]');if(!b)return;UI.arming=UI.arming===b.dataset.fp?null:b.dataset.fp;UI.armRot=0;renderParts();if(UI.arming)toast('Click the board to place · R rotates · Esc cancels');schedule()});
-
-/* options */
-const wLbl=()=>document.getElementById('wLbl').textContent=(UI.width/10).toFixed(2)+' mm';
-document.getElementById('rWidth').oninput=e=>{UI.width=+e.target.value;wLbl();schedule()};
-document.getElementById('rClear').oninput=e=>{UI.clear=+e.target.value;document.getElementById('cLbl').textContent=(UI.clear/10).toFixed(2)+' mm'};
-document.getElementById('segCorners').onclick=e=>{const b=e.target.closest('button');if(!b)return;UI.corners=b.dataset.c;document.querySelectorAll('#segCorners button').forEach(x=>x.setAttribute('aria-pressed',x===b))};
-document.getElementById('cTidy').onchange=e=>UI.tidy=e.target.checked;
-document.getElementById('cSnap').onchange=e=>UI.snap=e.target.checked;
-document.getElementById('cShove').onchange=e=>UI.shove=e.target.checked;
-function setWidth(w){UI.width=Math.max(2,Math.min(20,w));document.getElementById('rWidth').value=UI.width;wLbl();schedule()}
-
-/* header */
-document.getElementById('bUndo').onclick=undo;
-document.getElementById('bRedo').onclick=redo;
-document.getElementById('bReset').onclick=()=>{if(!confirm('Reset to the demo board? Your current board will be replaced.'))return;snapshot();S=seed();fixSel();changed();toast('Demo board restored (Undo brings yours back)')};
-document.getElementById('bSave').onclick=()=>download(JSON.stringify(S,null,1),(S.name||'board')+'.pcbp.json','application/json');
-document.getElementById('bLoad').onclick=()=>document.getElementById('fileIn').click();
-document.getElementById('fileIn').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);if(!d.parts||!d.traces||!d.nets)throw 0;snapshot();S=d;fixSel();changed();toast('Opened '+f.name)}catch(err){toast('That file is not a PCB Paint board')}});e.target.value=''};
-document.getElementById('zIn').onclick=()=>zoomAt(1/1.25);
-document.getElementById('zOut').onclick=()=>zoomAt(1.25);
-document.getElementById('zFit').onclick=()=>{UI.vb={x:40,y:50,w:520,h:310};schedule()};
-document.getElementById('bCheck').onclick=runCheck;
-document.getElementById('bMake').onclick=exportCopper;
-
-function download(text,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
-
-function runCheck(){
-  const marks=[];const nets=padNets();const pads=allPads();
-  for(let i=0;i<S.traces.length;i++)for(let j=i+1;j<S.traces.length;j++){const a=S.traces[i],b=S.traces[j];if(a.net===b.net)continue;const need=a.width/2+b.width/2+UI.clear-0.3;
-    for(let s=0;s<a.pts.length-1;s++)for(let k=0;k<b.pts.length-1;k++){if(segSegDist(a.pts[s],a.pts[s+1],b.pts[k],b.pts[k+1])<need){const c=closestSeg(b.pts[k],a.pts[s],a.pts[s+1]);marks.push(c.q);break}}}
-  for(const t of S.traces)for(const pd of pads){const pn=nets.map[pd.key];if(pn===t.net)continue;const d=polyRectDist(t.pts,pd);if(d<t.width/2+UI.clear-0.3)marks.push([pd.x,pd.y])}
-  for(const k of nets.conf){const pd=pads.find(p=>p.key===k);if(pd)marks.push([pd.x,pd.y])}
-  UI.marks=marks;UI.marksUntil=performance.now()+5000;schedule();setTimeout(schedule,5050);
-  toast(marks.length?`${marks.length} spot${marks.length>1?'s':''} too close — circled in red`:'All clear — every net keeps its distance');
-}
-function exportCopper(){
-  const B=S.board;const sc=0.1;
-  let s=`<svg xmlns="http://www.w3.org/2000/svg" width="${B.w*sc}mm" height="${B.h*sc}mm" viewBox="${B.x} ${B.y} ${B.w} ${B.h}">`;
-  s+=`<rect x="${B.x}" y="${B.y}" width="${B.w}" height="${B.h}" rx="${B.r}" fill="#fff" stroke="#000" stroke-width="0.5"/>`;
-  s+='<g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">'+S.traces.map(t=>`<path d="${dPath(t.pts)}" stroke-width="${t.width}"/>`).join('')+'</g>';
-  s+='<g fill="#000">'+allPads().map(pd=>pd.s==='c'?`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.w/2}"/>`:`<rect x="${pd.x0}" y="${pd.y0}" width="${pd.w}" height="${pd.h}"/>`).join('')+'</g>';
-  s+='<g fill="#fff">'+allPads().filter(pd=>pd.s==='c').map(pd=>`<circle cx="${pd.x}" cy="${pd.y}" r="${pd.w/5}"/>`).join('')+'</g></svg>';
-  download(s,(S.name||'board')+'-top-copper.svg','image/svg+xml');toast('Top copper downloaded as SVG (1:1, mm)');
-}
-
-/* keyboard */
-document.addEventListener('keydown',e=>{
-  if(e.target.matches('input,textarea'))return;
-  const k=e.key.toLowerCase();
-  if((e.ctrlKey||e.metaKey)&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
-  if((e.ctrlKey||e.metaKey)&&k==='y'){e.preventDefault();redo();return}
-  if(e.ctrlKey||e.metaKey||e.altKey)return;
-  if(k===' '){spaceDown=true;svg.style.cursor='grab';e.preventDefault();return}
-  if(k==='b')setTool('brush');else if(k==='v')setTool('move');else if(k==='e')setTool('erase');
-  else if(k==='n'){e.preventDefault();newNetUI()}
-  else if(k==='[')setWidth(UI.width-1);else if(k===']')setWidth(UI.width+1);
-  else if(k==='escape'){UI.arming=null;renderParts();schedule()}
-  else if(k==='r'){if(UI.arming){UI.armRot=(UI.armRot+90)%360;schedule()}else if(UI.cursor){const part=partAt(UI.cursor);if(part){snapshot();part.rot=(part.rot+90)%360;changed()}}}
-  else if((k==='delete'||k==='backspace')&&UI.tool==='move'&&UI.cursor){const part=partAt(UI.cursor);if(part){snapshot();S.parts=S.parts.filter(p=>p!==part);changed();toast(`Removed ${part.ref}`)}}
-  else if(/^[1-9]$/.test(k)){const n=S.nets[+k-1];if(n){UI.selNet=n.id;setTool('brush')}}
-});
-document.addEventListener('keyup',e=>{if(e.key===' '){spaceDown=false;svg.style.cursor=''}});
-
-wLbl();renderPots();renderParts();render();
-</script>
+<script src="js/geom.js"></script>
+<script src="js/font.js"></script>
+<script src="js/model.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

@@ -200,9 +200,10 @@ When a stroke comes within the gap of another net's trace (but doesn't cross it)
 |---|---|---|
 | Move | `V` | Drag a part. Trace ends sitting on its pads follow. Drag empty board to pan. `R` rotates by 90°; `Delete` removes the part. |
 | Eraser | `E` | Click or drag over traces to delete whole strokes. *Later*: a partial eraser that splits a stroke. |
-| Pour | `G` | *(milestone 2)* Bucket fill: click empty board to flood a region with the selected net. It keeps the gap from other nets, adds thermal spokes on same-net pads and warns about islands. |
-| Via | — | *(milestone 3)* Stamp, or `Alt` while painting. |
-| Silk | — | *(milestone 4)* Silkscreen brush and text. Lines are kept to at least 0.15 mm and trimmed off pads. |
+| Pour | `G` | Bucket fill: click empty board to flood a region with the selected net. It keeps the gap from other nets and from empty pads, adds thermal spokes on same-net pads and warns about islands. A pour is stored as its seed point and refills whenever the board changes. |
+| Via | `X` | Stamp, or `Alt` while painting. |
+| Silk | `S` | Silkscreen brush (drag) and text (click). Lines are kept to at least 0.15 mm and trimmed off pads on export. |
+| Shape | `O` | Board outline: drag handles to resize the rectangle, or draw any polygon and drag, add or Alt-click-remove its corners. |
 | Pan / zoom | Space-drag, middle-drag, wheel | Zoom about the cursor; **Fit board** resets the view. |
 
 **Parts drawer**: click a part to pick it up, click the board to place it, `R` to rotate, shift-click to place several, `Esc` to cancel. Reference designators number automatically (`R1`, `R2`…). Starter library: SOIC-8, 0805 resistor and capacitor, 1206, 5 mm LED, 2-pin header, 9 mm pot, 3.5 mm jack, 6 mm button. Later: KiCad `.kicad_mod` import and a search box.
@@ -230,15 +231,21 @@ When a stroke comes within the gap of another net's trace (but doesn't cross it)
 
 ```jsonc
 {
-  "v": 1,
+  "v": 2,
   "name": "little-blinker",
   "seq": 100,                                  // id counter
   "board": { "x": 60, "y": 70, "w": 460, "h": 270, "r": 26 },  // later: arbitrary outline path
   "nets":  [ { "id": "n1", "name": "VCC", "color": "#FF6B4A" } ],
   "parts": [ { "id": "p1", "ref": "U1", "fp": "soic8", "x": 300, "y": 200, "rot": 0 } ],
   "traces":[ { "id": "t1", "net": "n1", "width": 8, "layer": "top",
-               "pts": [[110,110],[410,110]] } ]
-  // later: "pours", "vias", "silk", "rules": { "gap": 2.5, "minWidth": 2 }, pinned pad nets
+               "pts": [[110,110],[410,110]] } ],
+  "vias":  [ { "id": "v1", "net": "n2", "x": 150, "y": 200, "d": 8, "drill": 4 } ],
+  "pours": [ { "id": "f1", "net": "n2", "layer": "bottom", "seed": [90,320], "thermal": true } ],
+  "silk":  [ { "id": "s1", "kind": "text", "x": 80, "y": 90, "size": 14, "text": "Blinky" },
+             { "id": "s2", "kind": "line", "width": 2, "pts": [[380,320],[460,318]] } ],
+  "rules": { "gap": 2.5, "preset": "jlcpcb" }
+  // board may also carry "poly": [[x,y],…] for a custom outline
+  // later: pinned pad nets
 }
 ```
 
@@ -254,6 +261,9 @@ When a stroke comes within the gap of another net's trace (but doesn't cross it)
 | Key | Action |
 |---|---|
 | `B` / `V` / `E` | Brush / Move / Eraser |
+| `G` / `X` / `S` / `O` | Pour / Via / Silk / Shape |
+| `L` | Swap between top and bottom copper |
+| `Alt` | While painting: drop a via and carry on on the other side. When starting a stroke from an empty pad: new net |
 | `N` | New net |
 | `1`–`9` | Select pot |
 | `[` `]` | Brush size − / + |
@@ -280,10 +290,10 @@ When a stroke comes within the gap of another net's trace (but doesn't cross it)
 | # | Scope |
 |---|---|
 | **M1 — Prototype** *(done, `index.html`)* | Studio UI, paint pots (add, rename, recolour, delete), net-aware brush, tidy (Round/45°/Free), pad snap, stop-short and no-cross rules, live shove with one-level cascade, move/rotate/erase, parts drawer, check board, SVG copper export, undo/redo, autosave, JSON save/open |
-| **M2 — Real boards** | Board outline editing (rectangle → any shape), bucket pour with thermals, Gerber/Excellon export, fab presets, per-net widths, mm grid soft-snap |
-| **M3 — Two layers** | Bottom copper, vias (stamp and mid-stroke), layer ghosting, crossings via the back |
-| **M4 — Make it pretty** | Silkscreen brush and text, mask colour and finish preview, 3D peek |
-| **M5 — Interop** | KiCad footprint import, netlist import (pinned pad nets plus a ratsnest hint), `.kicad_pcb` export, pot merge |
+| **M2 — Real boards** *(done)* | Board outline editing (rectangle → any shape), bucket pour with thermals, Gerber/Excellon export, fab presets, per-net widths, mm grid soft-snap |
+| **M3 — Two layers** *(done)* | Bottom copper, vias (stamp and mid-stroke), layer ghosting, crossings via the back |
+| **M4 — Make it pretty** *(silk done)* | Silkscreen brush and text, mask colour and finish preview, 3D peek |
+| **M5 — Interop** *(pot merge done)* | KiCad footprint import, netlist import (pinned pad nets plus a ratsnest hint), `.kicad_pcb` export, pot merge |
 
 ---
 
